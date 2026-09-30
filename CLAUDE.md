@@ -1,140 +1,119 @@
-# Project Toaster write-up — repo guide
+# Project Toaster write-up — repo guide for agents
 
-This repo holds the source material and the output for a written series about
-**Project Toaster**: an OSINT-based experiment that used agentic AI to monitor and
-predict the 2026 Johor State Election (JSE, polling day 11 July 2026, 56 DUN seats,
-29 for a majority).
+This repo holds the source material and the output for a written series about **Project Toaster**:
+an OSINT-based experiment in which two people (an analyst and a data scientist) used agentic AI to
+monitor and predict the 2026 Johor State Election (JSE: polling day 11 July 2026, 56 state seats,
+29 for a majority). The deliverable so far is **Part 1, "What we did"**, as `writeup.html`.
+A Part 2 (the post-mortem, with the actual results) is planned.
 
-## What is in the repo
+Read this file before touching anything. It records what the author decided, what has been verified
+against the sources, what reviewers found, and what is still open.
 
-| File | What it is | How it is used |
+## 1. What is in the repo
+
+| Path | What it is | How it is used |
 |---|---|---|
-| `Outline for Write-up #1-- What we did.docx` | The author's outline for Part 1. Contains the narrative skeleton, reviewer comments (from "tester" and "liane"), and three embedded slide images (the A–D grading rubric and two "Where each indicator comes from" tables, tiers 1–4). | Source of truth for structure, voice and section content. Read it with the docx skill or by unzipping `word/document.xml`; comments are in `word/comments.xml`; images in `word/media/`. |
-| `prediction_engine_explainer.md` | Methodology report for the first-principles seat-level prediction engine (three-stage OLS, effective composition, residual carry-forward, backtests 2013→2018 and 2018→2022, limitations). | Source for the "Predicting" and under-the-hood sections. |
-| `how-the-prediction-is-made.html` (13 MB) | Static "observability" page: the end-to-end pipeline diagram (sources → extraction → store → aggregation → judgment → calibration → output) plus 536 real logged model calls across 12 call types (prompts + outputs), including 47 daily briefings. All data is inline in one `const SNAPSHOT = {...}` JSON. | Source for the agent workflow description, real prompt/output examples, and the "Daily Toast" briefing text. The outline calls this file `observability_logs.html`. |
-| `JSE_dashboard_replay.html` (17 MB) | Offline replay of the live dashboard: 25 dashboard versions ("eras", each a full HTML app stored in `DATA.eras[hash].html`), 74 AI cycles (8 Jun–11 Jul 2026) with the full parameter payload per cycle in `DATA.payloads[i]`, and a frozen final week of feeds. The shell loads an era into an iframe via `srcdoc` and calls `applyParameters(payload)`. `window.__replayGoto(i)` jumps to cycle i. | Source for dashboard screenshots and the forecast-over-time data. Prediction mode is only rendered after clicking the `.mode-btn` labelled "Prediction"; the BN seat count is in `#ms-bn-val`, the seat table body in `#tbl-body`. |
-| `writeup.html` | **The deliverable**: Part 1 of the series, a single self-contained HTML article (about 1.9 MB with images embedded). | Edit this directly. See conventions below. |
-| `assets/` | The source images for the article (JPEG element screenshots of the dashboard and explainer), `hist_raw.json` (BN seat count per AI cycle, read off the replay), `hist.json` (the merged timeline data the article embeds), `seats_final.json` (the final-cycle seat table, 56 rows, for the results scatter later). | Edit or replace an image here, then re-run the embed script. |
-| `tools/embed_assets.py` | Embeds `assets/*.jpg` into the `<img data-asset="...">` tags and `assets/hist.json` into the `#hist-data` script tag of `writeup.html`. Idempotent. `--hist` rebuilds `hist.json` from `hist_raw.json` plus the replay payloads. | Run `python3 tools/embed_assets.py` after touching assets. |
+| `Outline for Write-up #1-- What we did.docx` | The author's outline for Part 1: narrative skeleton, nine reviewer comments (authors "tester" and "liane"), and three embedded slide images (the A–D grading rubric, and "Where each indicator comes from" tiers 1–2 and 3–4). | Source of truth for structure, voice and section content. Read by unzipping: text in `word/document.xml`, comments in `word/comments.xml`, images in `word/media/image1-3.png`. (`pandoc` is not installed.) |
+| `prediction_engine_explainer.md` | Methodology report for the first-principles seat-level engine: three-stage OLS, effective composition, residual carry-forward, backtests 2013→2018 and 2018→2022, limitations. | Source for section 07 and its "Under the hood" panel. Every number there was checked against this file. |
+| `how-the-prediction-is-made.html` (13 MB) | Static "observability" page: the pipeline diagram (sources → extraction → store → aggregation → judgment → calibration → output) plus 536 real logged model calls across 12 call types (system prompt, user message, response, model, created_at), including 47 daily briefings. Data is one JSON literal after `const SNAPSHOT = `. The outline calls this file `observability_logs.html`. | Source for the agent workflow, model names, prompt/output examples and the Daily Toast text. |
+| `JSE_dashboard_replay.html` (17 MB) | Offline replay of the live dashboard: 25 dashboard versions ("eras", each a full HTML app in `DATA.eras[hash].html`), 74 AI cycles (8 Jun–11 Jul 2026) with a full payload per cycle in `DATA.payloads[i]` (parameters, seat_overrides, confidence, agents, news_sentiment, campaign_activity, leader_presence, royal_signals_feed, foreign_mentions, voter_preference), and a frozen final week of feeds. Data is one JSON literal after `const DATA = `. | Source for all dashboard screenshots and the forecast-over-time data. |
+| `writeup.html` | **The deliverable.** Single self-contained HTML article, ~2.3 MB with images embedded, works offline. | Edit directly; see section 4. |
+| `assets/` | `*.jpg` screenshots the article embeds (see section 6 for what each is); `hist_raw.json` (BN seat count + seats-in-play per cycle, read off the replay); `hist.json` (merged timeline data the article embeds: per cycle `i, ts, sgt, bn, inplay, contest, p{six parameters}, conf, ov`); `seats_final.json` (the final-cycle seat table, 56 rows, headers + rows, for the future results scatter). `mon_campaign_digital.jpg` is captured but no longer referenced by the page. | Replace an image or the data here, then run the embed script. |
+| `tools/embed_assets.py` | Embeds `assets/*.jpg` into every `<img data-asset="NAME">` and `assets/hist.json` into `<script id="hist-data">`. Idempotent. `--hist` rebuilds `hist.json` from `hist_raw.json` + the replay payloads first. | `python3 tools/embed_assets.py [--hist]` after any asset change. |
+| `tools/check_render.js` | Playwright check: no script errors, no non-file/data requests, no horizontal scroll at 1280/820/390 px, no heading-order jumps, lightbox keyboard flow, sticky table header. Optional screenshot dump. | `node tools/check_render.js writeup.html [outdir]` before every commit. |
+| `tools/capture_dashboard.js` | Re-captures the screenshots (`shots`) or the per-cycle seat history (`history`) from the reference pages. | `node tools/capture_dashboard.js shots` / `history`, then `python3 tools/embed_assets.py --hist`. |
 
-Parsing tip: both big HTML files embed their data as one JSON literal after
-`const DATA = ` / `const SNAPSHOT = `; `json.JSONDecoder().raw_decode(text, offset)`
-in Python reads it without loading the page.
+Parsing tip for the two big HTML files: find the offset of `const DATA = ` / `const SNAPSHOT = ` and
+call `json.JSONDecoder().raw_decode(text, offset)` in Python. Never open them whole in the model context.
 
-## Key facts about the project (for consistency)
+## 2. Verified facts the article relies on
 
-- Timeline: commissioned ~2 months before polling day; dashboard cycles run 8 Jun–11 Jul 2026; nomination day 1 Jul (engine switched to a "contest-aware" version that models each seat's real 2026 line-up).
-- Three interfaces: **Monitoring** (extract info), **Predicting** (make assessments), **Updating** (summarise info, twice-daily ~400-word briefing, a.k.a. the "Daily Toast").
-- Monitoring indicators: voter preference by race (polls), voter sentiment from news comments (Malay / Chinese / English), campaign activity, key leader presence in Johor, royal signals, foreign (Singapore) mentions.
-- Prediction engine: BN% per seat ≈ BM×Malay_eff + BC×Chinese_eff + seat residual (2022 baseline BM 60.7%, BC 12.8%). Six parameters: ΔMalay, ΔChinese, turnout target, Malay–Chinese turnout gap, Malay opposition alignment rural / urban; plus per-seat overrides. Backtests: 52/56 seats correct and exact statewide BN seat count on both 2013→2018 and 2018→2022.
-- AI layer: five specialist "analysts" (voter-preference, voter-response, campaign, leader-interest, royal-signals) plus a rules-based synthesiser. Rule: "code computes; the AI only classifies and judges direction". Agents emit direction + size band + confidence band, never numbers; calibration turns bands into parameter moves via fixed published weights.
-- **Voter preference is not an LLM judgment**: an agent runs a daily web search for new polls and extracts support levels; the deltas are plain poll arithmetic. **Singapore mentions are display-only** and feed no parameter.
-- Final frozen forecast (11 Jul 17:36 SGT): BN 38 of 56, 20 seats in play. Actual results are NOT in the repo yet.
-- Models used in the shipped pipeline (from logs): GPT-5.5 for judgment/extraction/briefing, GPT-4.1 / GPT-4o / GPT-4o-mini for classification. Design partner during the framework phase: Claude Opus 4.8 Max (as named in the outline).
+All of these were checked against the sources by review agents; keep them consistent.
 
-## Decisions made by the author (do not relitigate)
+- Timeline: commissioned about two months before polling day; cycles 8 Jun–11 Jul 2026 (34 days, 74 cycles, up to 7 in a day while the pipeline was being built); nomination day 1 Jul, when the engine switched to a contest-aware version using each seat's real line-up. 25 dashboard versions shipped during the run.
+- Three interfaces: **Monitoring** (AI extracts), **Predicting** (AI judges), **Updating: the Daily Toast** (AI summarises; ~400 words, every morning and, from 1 Jul, most evenings; 47 briefings, 28 mornings, 16 evenings, three other).
+- Six monitoring indicators: voter preference by race (polls), voter sentiment from news comments (Malay/Chinese/English), campaign activity, key leader presence in Johor, royal signals, foreign (Singapore) mentions. Leader presence and Singapore mentions never appeared on the graded rubric list. Singapore mentions are display-only.
+- Engine: BN% per seat ≈ B_M×Malay_eff + B_C×Chinese_eff + seat residual; 2022 baseline B_M 60.7%, B_C 12.8%, T_M 66.2%, T_C 45.8%. Six dials: ΔMalay, ΔChinese, turnout target, Malay–Chinese turnout gap, non-BN Malay lean rural / urban (stored as the share to PH; the dashboard and the article show them as shifts from the 2022 split, rural 26% / urban 49%). Plus per-seat overrides (the dashboard's word; "nudge" only as a verb). Backtests: 52/56 correct and exact BN seat total on both 2013→2018 and 2018→2022. After nomination day: PN absent in 23 seats, Bersama in 15, two incumbents switched coalitions (Endau, Layang-Layang).
+- AI layer: five "analysts" (voter-preference, voter-response, campaign, leader-interest, royal-signals) plus a rules-based editor (the dashboard calls it the Synthesising Agent). Rule: "code computes; the AI only classifies and judges direction". Signals are direction + size band + confidence band, never numbers; calibration uses fixed published weights (the weight matrix in the article matches the dashboard's methodology modal verbatim).
+- Voter-preference is poll arithmetic, not judgment: a web search at every update finds polls; deltas are subtraction from the 2022 baselines. The poll term (`conf_poll_*`) was 0.00 in all 74 cycles because no Johor poll appeared; the support deltas ran on "drift" (analysts' judgment). The dashboard shows the same Sungai Bakap poll twice because de-duplication keyed on the pollster's name, which varied.
+- Leader-interest: the AI judges only the PH–PN split; the same presence data feeds ΔMalay (Zahid drag), turnout and the turnout gap by formula (per the leader_interest prompt), hence five rows in the weight table.
+- The briefing system prompt hard-codes "PN not on the ballot in 29 seats"; the engine's line-up data says 23. The article quotes the briefing verbatim and explains this in the note beneath it.
+- Comment counts: 113,735 labelled comments is the trailing 14-day window at the final cycle (ms 65,827 / zh 37,756 / en 10,152), not a campaign total. Community mood floors −0.68 / −0.69 / −0.63.
+- Final frozen forecast (11 Jul 17:36 Singapore time, freeze 18:00): BN 38 of 56, opposition 18 (11 PH, 6 PN, 1 MUDA), 20 seats in play at 10 pp, 5 BN wins inside ±5 pp, 19 seat overrides, confidence 0.269, 5 of 6 dials moved. Forecast path: 40 on 8 Jun, min 34 on 30 Jun, 43 on 2, 3 and 7 Jul, 38 at close. Cycle 70 (10 Jul 08:20) is an anomalous reset to baseline.
+- Models in the shipped pipeline: GPT-5.5 (judgment agents, news extractor, royal reader, poll search with web search, briefing), GPT-4.1 (campaign post classifier), GPT-4o (comment labeller), GPT-4o-mini (politics gate, Singapore filter). Design partner during the framework phase: Claude Opus 4.8 Max (as named in the outline).
+- Political framing (from the comment_label and briefing prompts): BN (UMNO-led) runs the Johor state government under MB Onn Hafiz; PH under PM Anwar leads the national unity government, of which BN is a member; PN is Bersatu + PAS. Sultan Ibrahim of Johor is also the King; Tunku Ismail is Regent. MUDA was founded by Syed Saddiq and is now led by Amira Aisya; it defended Puteri Wangsa in 2026 with Rashifa Aljunied.
+- Actual JSE results are **not** in the repo.
 
-1. **Tone**: professional overall with a bit of playfulness; keep the toaster metaphor and the naming used in the outline ("Project Toaster", "Daily Toast", "OG problem" etc.).
-2. **Series**: this is **Part 1** ("What we did"). A Part 2 (post-mortem, results analysis) will follow. Do not call this "part two" even though the outline's intro paragraph says so.
-3. **Placeholders** rather than invented content for: the title, the "main questions" the project set out to answer, the assumptions list (marked WIP by the author), the actual JSE results, and the results scatter plot. Placeholders are amber dashed boxes with the class `placeholder` and an HTML comment `<!-- PLACEHOLDER: ... -->` so they are easy to grep.
-4. **Where the outline and the explainer disagree, follow the explainer** (it reflects what shipped). Frame the voter-preference agent as the daily poll search + extraction step, not as a judgment agent.
-5. **Rubric critique notes**: the italic footnotes on the tier 3–4 slide ("the framework starts manufacturing its own measurements", "Chinese-press sentiment is filed in two places at once") and the undefined "+/−" row are shown in a keep-or-drop placeholder pending the author's decision.
-6. **Technical depth**: plain-language main narrative (target 2,500–3,500 words) with collapsible "Under the hood" panels carrying the equations, parameter tables, backtest results and the agent weight matrix.
-7. **Format**: one self-contained `writeup.html` that works with no internet: no CDN scripts, no web fonts, all images inline as base64 JPEG/PNG, charts as hand-written inline SVG. Must read well on a phone.
+## 3. Decisions made by the author (do not relitigate)
 
-## Conventions for editing writeup.html
+1. **Tone**: professional with a bit of playfulness; keep the outline's naming ("Project Toaster", "Daily Toast", "OG problem"). Reviewers trimmed the cutest lines; do not add jokes to the technical panels.
+2. **Series**: this is Part 1; say "the first in a series", never "part two".
+3. **Placeholders, not invention**, for anything the outline marks WIP or that the repo lacks (see section 7). Placeholder boxes use class `ph` (small variant `ph small`), inline ones `ph-inline`, and every box has an HTML comment `<!-- PLACEHOLDER: ... -->` so `grep PLACEHOLDER` finds them.
+4. **Where the outline and the explainer disagree, follow the explainer** (it reflects what shipped).
+5. **Rubric critique notes** from the tier 3–4 slide stay in a keep-or-drop placeholder until the author decides.
+6. **Technical depth**: plain-language main track, with `details.hood` "Under the hood" panels for equations, parameter tables, backtests and the weight matrix. Author's word target was 2,500–3,500; the page is now ~4,450 words on the main track after reviewer-requested additions (glossary, chain strip, cards). Trimming is the author's call; sections 05–06 are the densest.
+7. **Format**: one self-contained `writeup.html`, no internet needed: no CDN scripts, no web fonts, images as base64 data URIs, charts as inline SVG built by inline JS. Must read well at 390 px.
+8. The H1 carries a working title ("One analyst, an army of agents") so the page does not open on placeholder text; the title placeholder box sits above it.
 
-- Keep everything inline. Do not add `<script src>` or `<link href>` to remote hosts.
-- Images are base64 data URIs generated from Playwright element screenshots (see below). Keep the total file under ~8 MB.
-- Placeholders: keep the `placeholder` class and the `<!-- PLACEHOLDER -->` comments until the author fills them.
-- Colour conventions match the dashboard: BN blue, PH red, PN green, "other/gov" amber/grey.
+## 4. Anatomy of writeup.html
 
-## Regenerating assets
+Sections (ids `s1`–`s11`, kickers in `h2 .num`):
+01 How it all started (pull quote, three cards, political-context paragraph, `.who` card with who's-who and "Terms we use") ·
+02 What really happened (`.toaster` graphic, `.chain` six-step strip) ·
+03 Design (`.proc` design/build lanes, `.funnel`, yardstick cards, `.assump` list, `.fw` framework with click-to-reveal `#fw-out`) ·
+04 The three interfaces (`.ifaces`) ·
+05 What we fed it (rubric table, "what we used" table, hood panel with the 22-row filterable `#ind-table`, keep-or-drop placeholder) ·
+06 Monitoring (methodology table, six figures, rejected-data table, two "not explored" cards) ·
+07 Predicting (engine, hood panel with equations/backtests, six analyst cards, `.kinds` legend, `#pipe` diagram + `#pipe-out`, two figures, hood panel with the weight matrix) ·
+08 The Daily Toast (`.phone .bubble` verbatim briefing + note) ·
+09 The machine (`.stats`, tabbed dashboard screenshots, `#tl-box` forecast timeline with scrubber, readout tiles and table view) ·
+10 Results (placeholder) · 11 Next steps (`.next` box).
 
-Playwright is installed globally (`/opt/node22/lib/node_modules/playwright`) with Chromium
-under `/opt/pw-browsers`. Screenshots of dashboard panels were taken with element
-screenshots inside the replay iframe at the final cycle (`window.__replayGoto(73)`),
-after clicking the Prediction mode button where needed. The forecast history was
-produced by stepping through all 74 cycles and reading `#ms-bn-val`.
-Scripts used live in the session scratchpad, not the repo; they are small and easy to
-recreate from the notes above.
+Design system (all tokens in `:root`): cool neutral paper `#f2f3f1`, ink `#16181d`, serif body (Charter/Georgia stack) at 18 px on a 680 px measure, heavy sans headings, amber accent `#b1500a` used only for markers, selection states and placeholders. Grade chips A green / B slate / C ochre / D grey; pipeline kinds extraction teal / judgment violet / deterministic grey with 🤖🧠⚙️ glyphs (aria-hidden) so kind is never colour-only. Party colours (BN blue, PH red, PN green) appear only as dots beside names. Wide elements use `.wide` inside `.wrap` (breaks out to 1040 px). Prose tables carry `tbl stack` + `data-l` cell labels so they stack on phones; numeric hood tables scroll with a fade (`.tblwrap.scrolls`) and a hint.
 
-## Review history
+Interactive components (inline script, no dependencies): progress bar; "open all technical panels"; lightbox (`img.shot` are focusable buttons; header/main/footer become `inert`; Tab cycles pan ↔ Close; Escape closes; caption scrollable); tabs (`aria-pressed` + `hidden` panels); framework reveal (first item pre-selected); indicator filters (tier headers hide when empty, `aria-pressed`, `role=group`); pipeline (`N` map of name → [kind, description, reads, writes], `PL` plain-English sublabels, `COLS` layout, click highlights `rel-in`/`rel-out`, "Example" prefix until first click; names break at underscores via `<wbr>`); timeline (`draw()` rebuilds the SVG at container width on resize, crosshair hover with clamped tooltip, halo label, nomination marker with measured label, `CELLS` array drives both the readout tiles and the table view, Play/Pause with reduced-motion speed, scrub stops playback, `aria-valuetext` on the range). Print: panels open, tabs shown, pipeline in 7 columns.
 
-- **Revision 1** (first draft) was reviewed by three subagents (editorial/accuracy, visual design,
-  dataviz/accessibility). Scores 6 / 6 / 5. Top findings: a broken royal-signals screenshot, dashboard
-  screenshots too small to read, a 29-vs-23 PN-free-seat contradiction between prose and the quoted
-  briefing, unsupported sentences, no glossary for non-Malaysian readers, unfinished interactions.
-- **Revision 2** applied all blockers and should-fixes and changed the visual identity (cool neutral
-  ground, heavy sans headings, serif body, amber accent kept only for markers and placeholders).
-  Facts established during review that the text now relies on: the poll term (`conf_poll_*`) was 0.00
-  in all 74 cycles; the briefing system prompt hard-codes "PN not on the ballot in 29 seats" while the
-  engine's line-up data says 23; the 113,735 comment count is the trailing 14-day window; 47 briefings
-  ran 25 Jun–11 Jul (28 mornings, 16 evenings).
+## 5. Working on the file
 
-- **Revision 2 evaluation**: a findings-verification agent scored 8 / 8 / 7 (37 of 39 findings resolved)
-  and a cold-reader agent (non-technical, no Malaysia knowledge) scored comprehension 6/10, mainly
-  because "agent" was undefined, the BN-runs-Johor / PH-runs-the-country fact was buried, engine jargon
-  appeared in section 05 before the engine, and the timeline lean dials were mislabelled.
-- **Revision 3** fixed those plus the two factual slips revision 2 introduced (posts-per-day range;
-  "national polls" should be "polls from outside Johor"), completed the lightbox focus trap, added
-  plain-English sublabels to the pipeline nodes, and separated the grade B colour from the BN blue and
-  extraction teal. The lean dials now display as a shift from the 2022 split (rural 26% to PH, urban 49%),
-  which is how the live dashboard showed them after nomination day; the stored parameter is the share.
-  Revision 3 uses a working H1 ("One analyst, an army of agents") so the page does not open on a
-  placeholder; the title placeholder box still sits above it.
+- Edit `writeup.html` directly. Images are embedded, so the file is 2.3 MB; to read the source comfortably, strip data URIs into a scratch copy (`re.sub(r'data:image/[a-z]+;base64,[A-Za-z0-9+/=]+','DATAURI',s)`). Do not strip the repo copy in place (the permission classifier blocks that as destructive, and it is unnecessary: the embed script re-embeds).
+- For large rewrites, write the whole file with empty `src=""` on the `data-asset` images and run `python3 tools/embed_assets.py`. The Write tool requires a fresh Read of the file first.
+- For small edits, Python exact-string replacement works well; note the file stores real curly apostrophes (U+2019), not `’` escapes.
+- Before committing: `node tools/check_render.js writeup.html` must print OK for all three widths. Then screenshot the changed regions and look at them; inject `html{scroll-behavior:auto !important}` before scrolled screenshots or captures land mid-scroll.
+- Never `pkill -f <script name>` from a shell whose own command line contains that name; it kills the shell. Foreground `sleep` is blocked; run long Playwright jobs with `nohup ... &` and poll a log file.
+- Keep negative numbers as true minus signs (U+2212) in the timeline readout and table (`sgn()` does this).
+- Colour changes: re-run the dataviz validator (`node /tmp/claude-0/bundled-skills/*/dataviz/scripts/validate_palette.js "<hex,...>" --mode light` if that skill is present). The grey slots (grade D, deterministic) fail the chroma floor by design; letters and glyphs are the secondary encoding.
 
-- **Revision 3 reviews** (second round, four agents: editorial 7/10, design 7/10, dataviz 7/10, cold
-  reader 6/10). Three factual slips found and fixed in revision 4: the prediction caption had inverted
-  the seat-strip legend (amber = toss-up inside ±5 pp; outlined = lean by under 10 pp); the polls caption
-  claimed a de-duplication the screenshot disproves (the same Sungai Bakap poll shows twice under two
-  spellings of the pollster); the leader-interest card said the agent moves one dial, while its presence
-  data feeds four (the AI judges only the PH–PN split; a Zahid drag on ΔMalay, a turnout lift and the
-  turnout gap are computed by formula from the same data, per the leader_interest prompt).
-- **Revision 4** also folded the "blueprints" section into Design (sections renumbered 01–11), added a
-  six-step chain strip in section 02 and a "Terms we use" glossary in section 01, unified vocabulary
-  (editor = the dashboard's Synthesising Agent; "seat overrides" everywhere; the third interface is
-  "Updating: the Daily Toast"), stacked the prose tables on phones (class `tbl stack` with `data-l`
-  cell labels), and renamed the judgment-column poll node `poll_deltas`.
+## 6. Assets and how they were captured
 
-- **Revision 4 evaluation**: verification agent scored 9 / 8.5 / 9 (editorial, visual, charts and
-  accessibility) with every finding from the second round resolved; its nine minor leftovers (true
-  minus signs, tooltip and end-label placement, table caption outside the scroll box, cadence wording,
-  pipeline names breaking at underscores via <wbr>, a PLACEHOLDER comment on the toaster figure) were
-  applied in the same revision before pushing.
+All dashboard screenshots are from the replay at the final cycle (`window.__replayGoto(73)`), 1280 px viewport, device scale 2, JPEG q82, via `tools/capture_dashboard.js shots`:
+`mon_polls` (baseline banner + legend + Malay/Chinese poll charts), `mon_sentiment_ms` / `mon_sentiment_zh` (the two `.ns-panel` cards), `mon_campaign_events` (used) and `mon_campaign_digital` (unused), `mon_leaders` (heatmap), `mon_royal` (royal card, clipped to 560 px; the card itself is 5,000+ px tall, so never element-screenshot it whole), `dash_monitoring` / `dash_prediction` (the whole iframe), `pred_ai` (the reasoning panel, clipped to 600 px), `dash_seats` (the seat table from its header, clipped to 560 px), `explainer_extractor` (first call card on the explainer page, 1.5x).
+The forecast history (`assets/hist_raw.json`) comes from `tools/capture_dashboard.js history`: it steps through all 74 cycles, clicks Prediction mode in the frame, and reads `#ms-bn-val` (later versions) or `#c-bn` (early versions) plus the "N of 56 seats in play" text. Seat counts are what the dashboard displayed at the time; briefings sometimes quote a different count for the same day because they ran at a different cycle.
 
-## Status and what is still open (as of revision 4)
+## 7. Open items for the author (as of revision 4)
 
-Placeholders in `writeup.html` (grep `PLACEHOLDER` for the boxes and `ph-inline` for the two inline
-ones), all waiting on the author:
-
-1. Title (working title in the H1; three candidates in the box above it).
-2. Byline (inline, in the meta row).
-3. The four toaster slices and "the little button" (inline note under the toaster graphic, section 02).
+Placeholders in `writeup.html` (`grep PLACEHOLDER`; the byline and toaster notes are inline `ph-inline`):
+1. Title (working H1; three candidates in the box).
+2. Byline.
+3. What the fourth toaster slice and "the little button" stand for (section 02; current graphic guesses "Dashboard" and the manual-override dial).
 4. The "main questions" the project set out to answer (section 03).
-5. The assumptions list: transcribed from the outline and grouped, but marked WIP there; one query on
-   assumption 06 (section 03).
-6. Keep-or-drop decision on the two critique notes from the tier 3–4 rubric slide (section 05).
-7. Daily Toast: real Telegram screenshots, optional (section 08).
-8. Results: what the 5% yardstick applies to, the actual JSE seat count and seat-level shares, and the
-   predicted-vs-actual scatter (section 10). `assets/seats_final.json` has the final-cycle predictions
-   for all 56 seats if the scatter is to be rebuilt in-page.
+5. The assumptions list: transcribed from the outline, grouped, marked WIP there; one query on assumption 06 (Syed Saddiq / Puteri Wangsa).
+6. Keep-or-drop on the two rubric critique notes (section 05).
+7. Optional Telegram screenshots of the Daily Toast (section 08).
+8. Results (section 10): what the 5% yardstick applies to (seats or seat-level vote share), the actual JSE seat count and seat-by-seat shares, and the predicted-vs-actual scatter. `assets/seats_final.json` has the final-cycle predictions for all 56 seats if the scatter is to be rebuilt in-page.
 
-Things a future agent should know:
+Material for Part 2 already in the repo: the 47 briefings in the SNAPSHOT (they narrate every move), the per-cycle payloads (agent findings, risk flags, overrides), `assets/hist.json`, `assets/seats_final.json`, and the three threads the article ends on (poll term never fired; 29-vs-23 seat count; how the 20 in-play seats resolved).
 
-- The forecast timeline reads seat counts the dashboard displayed at the time (from `#ms-bn-val`
-  in later versions, `#c-bn` in early ones). The daily briefings sometimes quote a different
-  seat count for the same day because they were generated at a different cycle.
-- Word count: about 4,150 words of visible main-track text (excluding tables, placeholders, the briefing
-  text, figure captions, the pipeline and the timeline readout), of which roughly 900 are the who's-who
-  card, the interface/agent cards and the closing box added at reviewers' request. The author's target
-  was 2,500–3,500, so trimming is the author's call; sections 06–07 are the densest stretch.
-- Rendering check: open the file with Playwright (no network), confirm zero `pageerror`s, zero
-  non-`file:`/`data:` requests, and `document.documentElement.scrollWidth === 390` at a 390 px
-  viewport. Set `html{scroll-behavior:auto}` before taking scrolled screenshots, otherwise the
-  page's smooth scrolling produces half-scrolled captures.
+## 8. Review process used (and worth repeating)
 
-## Git
+Each round ran independent subagents in parallel, all instructed not to edit files and to return prioritised, evidence-backed findings with concrete fixes:
+- **Editorial / accuracy**: checks every number, name and claim against the outline, the explainer, the SNAPSHOT and the replay payloads; flags invented claims; proposes sentence rewrites.
+- **Visual design**: renders at 1280 / 820 / 390 px with Playwright, screenshots every slice and every interaction, checks typography, contrast (computed from `:root`), spacing, image legibility, keyboard focus.
+- **Dataviz / accessibility**: audits the chart and diagram against the dataviz skill's rubric and validator, ARIA names/roles/states, live regions, heading order, table semantics.
+- **Cold reader**: a non-technical persona with no Malaysia knowledge reads the stripped copy in order and reports where it got lost, unexplained terms, drag, tone lurches and the placeholders' effect.
+- **Evaluator**: after fixes, verifies each earlier finding RESOLVED / PARTLY / NOT with evidence, checks cross-references after any renumbering, and scores.
 
-Work on branch `claude/happy-ptolemy-wnrsxg`. Commit messages should say what changed
-in the article. Never push to a different branch without being asked.
+Score history: rev 1: 6 / 6 / 5 → rev 2: 8 / 8 / 7 (cold reader 6) → rev 3: 7 / 7 / 7 (cold reader 6; three factual slips found) → rev 4: 9 / 8.5 / 9. The recurring lesson: every round found one or two confident sentences that no source supported; check each new claim against the logs before keeping it.
+
+## 9. Git
+
+Branch: `claude/happy-ptolemy-wnrsxg`. Commit messages describe what changed in the article. Never push to a different branch without being asked. `git` identity used so far: `cmmtscpr3 <cmmtscrpr3@gmail.com>` via `-c` flags.
