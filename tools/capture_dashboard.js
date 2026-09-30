@@ -67,11 +67,37 @@ async function shots(browser) {
   await fr.evaluate(() => { const x = document.querySelector('.cb-dismiss'); x && x.click(); }); await page.waitForTimeout(400);
   await page.locator('#frame').screenshot({ path: path.join(A, 'dash_prediction.jpg'), ...jpg });
   await clip('#tab-ai .reasoning-panel', 'pred_ai', 600);
-  await fr.evaluate(() => document.querySelector('.tab[data-tab="predict"]').click()); await page.waitForTimeout(1500);
-  const t = await fr.evaluate(() => { const tb = document.getElementById('tbl-body').closest('table'); tb.scrollIntoView({ block: 'start' }); const b = tb.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; });
+  // Manual override sidebar (collapsed by default behind #sb-handle): open it, let it grow to full height,
+  // split at the "Turnout scenario" title and compose the two halves side by side into pred_sidebar.jpg.
+  await fr.evaluate(() => { if (document.body.classList.contains('sb-collapsed')) document.getElementById('sb-handle').click(); });
+  await page.waitForTimeout(1200);
+  await fr.evaluate(() => { const a = document.querySelector('aside.sidebar'); const sc = a.querySelector('.sidebar-scroll'); for (const e of [a, sc]) { e.style.overflow = 'visible'; e.style.maxHeight = 'none'; e.style.height = 'auto'; } a.style.position = 'static'; for (const e of [document.documentElement, document.body]) { e.style.height = 'auto'; e.style.overflow = 'visible'; } document.querySelectorAll('.main,.main-scroll').forEach(e => { e.style.overflow = 'visible'; e.style.height = 'auto'; }); });
+  await page.waitForTimeout(600);
+  const docH = await fr.evaluate(() => document.documentElement.scrollHeight);
+  await page.evaluate(h => { document.getElementById('frame').style.height = h + 'px'; for (const e of [document.documentElement, document.body]) { e.style.height = 'auto'; e.style.overflow = 'visible'; } }, docH + 40);
+  await page.waitForTimeout(800);
+  const fb2 = await page.locator('#frame').boundingBox();
+  await page.setViewportSize({ width: 1280, height: Math.ceil(fb2.y + fb2.height) + 20 }); await page.waitForTimeout(500);
+  const g = await fr.evaluate(() => { const a = document.querySelector('aside.sidebar'); const r = a.getBoundingClientRect(); const t = Array.from(a.querySelectorAll('.sec-title')).find(e => /Turnout/.test(e.textContent)); return { x: r.x, y: r.y, w: r.width, h: r.height, split: t.getBoundingClientRect().top - r.y - 14 }; });
+  const tmp = require('os').tmpdir();
+  await page.screenshot({ path: path.join(tmp, 'sb_top.png'), clip: { x: fb2.x + g.x, y: fb2.y + g.y, width: g.w, height: g.split } });
+  await page.screenshot({ path: path.join(tmp, 'sb_bot.png'), clip: { x: fb2.x + g.x, y: fb2.y + g.y + g.split, width: g.w, height: g.h - g.split } });
+  const cp = await browser.newPage({ viewport: { width: 700, height: 1200 }, deviceScaleFactor: 2 });
+  await cp.setContent(`<body style="margin:0;background:#fff"><div id="c" style="display:inline-flex;gap:18px;align-items:flex-start;padding:10px;background:#fff"><img src="file://${tmp}/sb_top.png" style="width:${g.w}px;display:block"><img src="file://${tmp}/sb_bot.png" style="width:${g.w}px;display:block"></div></body>`);
+  await cp.waitForTimeout(800);
+  await cp.locator('#c').screenshot({ path: path.join(A, 'pred_sidebar.jpg'), ...jpg }); console.log('ok pred_sidebar');
+  await cp.close();
+  // restore the frame for the seat-table capture
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await page.evaluate(() => { document.getElementById('frame').style.height = ''; });
+  await page.evaluate(() => window.__replayGoto(73)); await page.waitForTimeout(6000);
+  await fr.evaluate(() => { Array.from(document.querySelectorAll('.mode-btn')).find(b => /Prediction/.test(b.innerText)).click(); }); await page.waitForTimeout(2500);
+  const fr2 = frameOf(page); const fb3 = await page.locator('#frame').boundingBox();
+  await fr2.evaluate(() => document.querySelector('.tab[data-tab="predict"]').click()); await page.waitForTimeout(1500);
+  const t = await fr2.evaluate(() => { const tb = document.getElementById('tbl-body').closest('table'); tb.scrollIntoView({ block: 'start' }); const b = tb.getBoundingClientRect(); return { x: b.x, y: b.y, w: b.width, h: b.height }; });
   await page.waitForTimeout(400);
   const top = Math.max(t.y, 0);
-  await page.screenshot({ path: path.join(A, 'dash_seats.jpg'), ...jpg, clip: { x: fb.x + t.x, y: fb.y + top, width: Math.min(t.w, fb.width - t.x), height: Math.min(t.h, fb.height - top, 560) } });
+  await page.screenshot({ path: path.join(A, 'dash_seats.jpg'), ...jpg, clip: { x: fb3.x + t.x, y: fb3.y + top, width: Math.min(t.w, fb3.width - t.x), height: Math.min(t.h, fb3.height - top, 560) } });
   console.log('ok dash_seats');
   await page.close();
 }
