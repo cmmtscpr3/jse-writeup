@@ -97,6 +97,12 @@ recreate from the notes above.
   "Updating: the Daily Toast"), stacked the prose tables on phones (class `tbl stack` with `data-l`
   cell labels), and renamed the judgment-column poll node `poll_deltas`.
 
+- **Revision 4 evaluation**: verification agent scored 9 / 8.5 / 9 (editorial, visual, charts and
+  accessibility) with every finding from the second round resolved; its nine minor leftovers (true
+  minus signs, tooltip and end-label placement, table caption outside the scroll box, cadence wording,
+  pipeline names breaking at underscores via <wbr>, a PLACEHOLDER comment on the toaster figure) were
+  applied in the same revision before pushing.
+
 ## Status and what is still open (as of revision 4)
 
 Placeholders in `writeup.html` (grep `PLACEHOLDER` for the boxes and `ph-inline` for the two inline
