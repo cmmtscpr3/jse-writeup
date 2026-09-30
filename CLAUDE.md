@@ -84,19 +84,35 @@ recreate from the notes above.
   Revision 3 uses a working H1 ("One analyst, an army of agents") so the page does not open on a
   placeholder; the title placeholder box still sits above it.
 
-## Status and what is still open (as of revision 3)
+- **Revision 3 reviews** (second round, four agents: editorial 7/10, design 7/10, dataviz 7/10, cold
+  reader 6/10). Three factual slips found and fixed in revision 4: the prediction caption had inverted
+  the seat-strip legend (amber = toss-up inside ±5 pp; outlined = lean by under 10 pp); the polls caption
+  claimed a de-duplication the screenshot disproves (the same Sungai Bakap poll shows twice under two
+  spellings of the pollster); the leader-interest card said the agent moves one dial, while its presence
+  data feeds four (the AI judges only the PH–PN split; a Zahid drag on ΔMalay, a turnout lift and the
+  turnout gap are computed by formula from the same data, per the leader_interest prompt).
+- **Revision 4** also folded the "blueprints" section into Design (sections renumbered 01–11), added a
+  six-step chain strip in section 02 and a "Terms we use" glossary in section 01, unified vocabulary
+  (editor = the dashboard's Synthesising Agent; "seat overrides" everywhere; the third interface is
+  "Updating: the Daily Toast"), stacked the prose tables on phones (class `tbl stack` with `data-l`
+  cell labels), and renamed the judgment-column poll node `poll_deltas`.
 
-Placeholders in `writeup.html` (grep `PLACEHOLDER`), all waiting on the author:
+## Status and what is still open (as of revision 4)
 
-1. Title (three candidates offered in the placeholder box).
-2. Byline.
-3. The "main questions" the project set out to answer (section 04).
-4. The assumptions list: transcribed from the outline and grouped, but marked WIP there.
-5. Keep-or-drop decision on the three critique notes from the tier 3–4 rubric slide (section 06).
-6. Daily Toast: real Telegram screenshots, if wanted, next to the typeset briefing (section 09).
-7. Results: actual JSE seat count and seat-level shares, plus the predicted-vs-actual scatter
-   (section 11). `assets/seats_final.json` has the final-cycle predictions for all 56 seats if the
-   scatter is to be rebuilt in-page.
+Placeholders in `writeup.html` (grep `PLACEHOLDER` for the boxes and `ph-inline` for the two inline
+ones), all waiting on the author:
+
+1. Title (working title in the H1; three candidates in the box above it).
+2. Byline (inline, in the meta row).
+3. The four toaster slices and "the little button" (inline note under the toaster graphic, section 02).
+4. The "main questions" the project set out to answer (section 03).
+5. The assumptions list: transcribed from the outline and grouped, but marked WIP there; one query on
+   assumption 06 (section 03).
+6. Keep-or-drop decision on the two critique notes from the tier 3–4 rubric slide (section 05).
+7. Daily Toast: real Telegram screenshots, optional (section 08).
+8. Results: what the 5% yardstick applies to, the actual JSE seat count and seat-level shares, and the
+   predicted-vs-actual scatter (section 10). `assets/seats_final.json` has the final-cycle predictions
+   for all 56 seats if the scatter is to be rebuilt in-page.
 
 Things a future agent should know:
 
