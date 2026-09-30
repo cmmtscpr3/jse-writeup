@@ -59,7 +59,20 @@ produced by stepping through all 74 cycles and reading `#ms-bn-val`.
 Scripts used live in the session scratchpad, not the repo; they are small and easy to
 recreate from the notes above.
 
-## Status and what is still open (as of the first draft)
+## Review history
+
+- **Revision 1** (first draft) was reviewed by three subagents (editorial/accuracy, visual design,
+  dataviz/accessibility). Scores 6 / 6 / 5. Top findings: a broken royal-signals screenshot, dashboard
+  screenshots too small to read, a 29-vs-23 PN-free-seat contradiction between prose and the quoted
+  briefing, unsupported sentences, no glossary for non-Malaysian readers, unfinished interactions.
+- **Revision 2** applied all blockers and should-fixes and changed the visual identity (cool neutral
+  ground, heavy sans headings, serif body, amber accent kept only for markers and placeholders).
+  Facts established during review that the text now relies on: the poll term (`conf_poll_*`) was 0.00
+  in all 74 cycles; the briefing system prompt hard-codes "PN not on the ballot in 29 seats" while the
+  engine's line-up data says 23; the 113,735 comment count is the trailing 14-day window; 47 briefings
+  ran 25 Jun–11 Jul (28 mornings, 16 evenings).
+
+## Status and what is still open (as of revision 2)
 
 Placeholders in `writeup.html` (grep `PLACEHOLDER`), all waiting on the author:
 
