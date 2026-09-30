@@ -72,7 +72,19 @@ recreate from the notes above.
   engine's line-up data says 23; the 113,735 comment count is the trailing 14-day window; 47 briefings
   ran 25 Jun–11 Jul (28 mornings, 16 evenings).
 
-## Status and what is still open (as of revision 2)
+- **Revision 2 evaluation**: a findings-verification agent scored 8 / 8 / 7 (37 of 39 findings resolved)
+  and a cold-reader agent (non-technical, no Malaysia knowledge) scored comprehension 6/10, mainly
+  because "agent" was undefined, the BN-runs-Johor / PH-runs-the-country fact was buried, engine jargon
+  appeared in section 05 before the engine, and the timeline lean dials were mislabelled.
+- **Revision 3** fixed those plus the two factual slips revision 2 introduced (posts-per-day range;
+  "national polls" should be "polls from outside Johor"), completed the lightbox focus trap, added
+  plain-English sublabels to the pipeline nodes, and separated the grade B colour from the BN blue and
+  extraction teal. The lean dials now display as a shift from the 2022 split (rural 26% to PH, urban 49%),
+  which is how the live dashboard showed them after nomination day; the stored parameter is the share.
+  Revision 3 uses a working H1 ("One analyst, an army of agents") so the page does not open on a
+  placeholder; the title placeholder box still sits above it.
+
+## Status and what is still open (as of revision 3)
 
 Placeholders in `writeup.html` (grep `PLACEHOLDER`), all waiting on the author:
 
@@ -91,8 +103,10 @@ Things a future agent should know:
 - The forecast timeline reads seat counts the dashboard displayed at the time (from `#ms-bn-val`
   in later versions, `#c-bn` in early ones). The daily briefings sometimes quote a different
   seat count for the same day because they were generated at a different cycle.
-- Word count of the main narrative is about 3,500 (excluding tables, placeholders, the briefing
-  text and figure captions). The author's target was 2,500–3,500.
+- Word count: about 4,150 words of visible main-track text (excluding tables, placeholders, the briefing
+  text, figure captions, the pipeline and the timeline readout), of which roughly 900 are the who's-who
+  card, the interface/agent cards and the closing box added at reviewers' request. The author's target
+  was 2,500–3,500, so trimming is the author's call; sections 06–07 are the densest stretch.
 - Rendering check: open the file with Playwright (no network), confirm zero `pageerror`s, zero
   non-`file:`/`data:` requests, and `document.documentElement.scrollWidth === 390` at a 390 px
   viewport. Set `html{scroll-behavior:auto}` before taking scrolled screenshots, otherwise the
