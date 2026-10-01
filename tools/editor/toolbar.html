@@ -1,0 +1,28 @@
+<div id="ed-bar" data-editor>
+  <button type="button" class="ed-pill" id="ed-open" title="Edit the text of this draft in place">✎ Edit this draft<span class="ed-n" id="ed-pill-n" hidden></span></button>
+  <div class="ed-tools" id="ed-tools" hidden>
+    <div class="ed-status"><b>Editing</b> · <span id="ed-count">no changes</span><span class="ed-warn" id="ed-warn"></span></div>
+    <div class="ed-btns">
+      <button type="button" id="ed-changes" aria-expanded="false" aria-controls="ed-panel">Changes</button>
+      <button type="button" id="ed-help" aria-expanded="false" aria-controls="ed-helpbox">How to edit</button>
+      <button type="button" id="ed-discard">Discard all</button>
+      <button type="button" id="ed-save" title="Download writeup.editable.html with your edits baked in, to continue later or send back">Save working copy</button>
+      <button type="button" id="ed-export" class="ed-primary" title="Download the clean writeup.html, without the editor">Export final</button>
+      <button type="button" id="ed-done">Done</button>
+    </div>
+  </div>
+  <div class="ed-panel" id="ed-panel" hidden></div>
+  <div class="ed-panel" id="ed-helpbox" hidden>
+    <b>How to edit</b>
+    <ul>
+      <li>Click any paragraph, heading, caption, list item or table cell and type. Links, buttons, charts and the diagram stay locked; ask Claude for structural changes.</li>
+      <li><kbd>Enter</kbd> starts a new paragraph or list item. <kbd>Shift</kbd>+<kbd>Enter</kbd> is a line break. <kbd>Backspace</kbd> in an empty paragraph deletes it.</li>
+      <li><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>B</kbd> bold, <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>I</kbd> italic. Pasted text comes in as plain text.</li>
+      <li>Amber boxes are placeholders. <b>Replace with text</b> swaps the box for a paragraph, <b>Add image</b> inserts a figure above it, <b>Delete box</b> removes it. The ✓ beside an amber underline marks that text as final.</li>
+      <li>Edits autosave in this browser only. <b>Save working copy</b> downloads <code>writeup.editable.html</code> with your edits baked in: open that file to continue on another machine, or send it to Claude. <b>Export final</b> downloads the clean <code>writeup.html</code>.</li>
+      <li><b>Changes</b> lists what you touched, with a revert button for each. <b>Discard all</b> throws away every unsaved edit in this browser.</li>
+    </ul>
+  </div>
+  <div class="ed-toast" id="ed-toast" role="status" hidden></div>
+  <input type="file" id="ed-file" accept="image/*" hidden>
+</div>

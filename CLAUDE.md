@@ -22,6 +22,8 @@ against the sources, what reviewers found, and what is still open.
 | `tools/embed_assets.py` | Embeds `assets/*.jpg` into every `<img data-asset="NAME">` and `assets/hist.json` into `<script id="hist-data">`. Idempotent. `--hist` rebuilds `hist.json` from `hist_raw.json` + the replay payloads first. | `python3 tools/embed_assets.py [--hist]` after any asset change. |
 | `tools/check_render.js` | Playwright check: no script errors, no non-file/data requests, no horizontal scroll at 1280/820/390 px, no heading-order jumps, lightbox keyboard flow, sticky table header. Optional screenshot dump. | `node tools/check_render.js writeup.html [outdir]` before every commit. |
 | `tools/capture_dashboard.js` | Re-captures the screenshots (`shots`) or the per-cycle seat history (`history`) from the reference pages. | `node tools/capture_dashboard.js shots` / `history`, then `python3 tools/embed_assets.py --hist`. |
+| `writeup.editable.html` | **Generated**: `writeup.html` plus an in-page text editor (see section 10). Never edit by hand. | `python3 tools/make_editable.py` after every change to `writeup.html`. |
+| `tools/make_editable.py`, `tools/editor/`, `tools/test_editor.js` | The build script, the editor's source (`pre.js`, `editor.js`, `editor.css`, `toolbar.html`) inlined into the editable copy, and its end-to-end test. | Edit the editor here, rebuild, run `node tools/test_editor.js` (section 10). |
 
 Parsing tip for the two big HTML files: find the offset of `const DATA = ` / `const SNAPSHOT = ` and
 call `json.JSONDecoder().raw_decode(text, offset)` in Python. Never open them whole in the model context.
@@ -118,3 +120,43 @@ Score history: rev 1: 6 / 6 / 5 → rev 2: 8 / 8 / 7 (cold reader 6) → rev 3: 
 ## 9. Git
 
 Branch: `claude/happy-ptolemy-wnrsxg`. Commit messages describe what changed in the article. Never push to a different branch without being asked. `git` identity used so far: `cmmtscpr3 <cmmtscrpr3@gmail.com>` via `-c` flags.
+
+## 10. The editable copy (writeup.editable.html)
+
+The author asked for a way to edit the text without opening the HTML. `writeup.editable.html` is
+`writeup.html` with an editor layered on top; the article file itself is never modified by it.
+
+How it works:
+- `tools/editor/pre.js` runs before the article's own script. It gives every text-bearing block in
+  header/main/footer a stable id (`data-ed="bN"`, document order) and marks the editable ones with
+  `data-ed-leaf`. Inline runs (b, i, a, span...) are edited as part of their block; buttons, the
+  contents list, the lightbox, `.tabs`, `#tl-box`, `#pipe`, `#pipe-out`, `#fw-out`, `summary` and
+  anything the page generates at runtime are never editable. Placeholder boxes (`.ph`) get an id but
+  no leaf flag; they carry actions instead. It then keeps a pristine clone of the document.
+- `tools/editor/editor.js` (end of body) records an ordered op log (`add`, `rm`, `unph`, `reph`) plus a
+  map of per-block innerHTML edits, autosaves them to `localStorage` under `toaster-edit:<build>`, and
+  replays them onto the live page on load. Both exports replay the log onto a fresh copy of the pristine
+  clone, so runtime-generated markup can never leak into a file. The article's main `<script>` is parsed
+  after the snapshot, so editor.js grafts the later script elements into the clone at startup.
+- Readers see a "✎ Edit this draft" pill. Edit mode: click a block and type; Enter splits p/li; Backspace
+  in an empty p/li deletes it; paste is plain text; links and buttons inside editable text are inert.
+  `.ph` boxes show Replace with text / Add image (file -> data URI figure with `img.shot`) / Delete box;
+  `.ph-inline` gets a "✓ final" button that drops the class. Removing a box also removes its
+  `<!-- PLACEHOLDER -->` comment (lookup skips blocks inserted in front of the box).
+- **Export final** downloads `writeup.html` with all editor markup and `data-ed*` attributes stripped;
+  a no-edit export differs from the source only by `hidden=""` and head/body line breaks, so git diffs
+  stay readable. **Save working copy** downloads `writeup.editable.html` with the edits baked in, a new
+  build stamp (so it does not share the browser draft of the file it came from) and a `#ed-orig` JSON
+  block recording originals / added / removed / marked-final so its Changes panel still lists them.
+- Round trip to the repo: the author sends either file; replace `writeup.html` with an exported final
+  (or export one from a working copy), run `node tools/check_render.js writeup.html`, rebuild the
+  editable copy, commit both.
+
+Testing: `node tools/test_editor.js` is the end-to-end Playwright test (edit, Enter split, placeholder replace / image / delete, mark final, reload, export final
+and verify no editor markup + comments dropped, save working copy, reopen, export again and compare
+byte-for-byte, revert a baked removal, discard, 390 px toolbar). It must print ALL OK after any change to
+the editor; `node tools/check_render.js writeup.editable.html` must also pass. Known limits: no
+structural edits (new tables, reordering, new figures outside placeholders), framework item buttons are
+not editable, and a draft with embedded images can exceed the browser's localStorage quota (the editor
+warns and the user should Save working copy).
+
