@@ -20,14 +20,15 @@
 .ed-panel li{margin:0 0 6px}
 .ed-panel kbd{font-family:var(--mono);font-size:12px;background:var(--surface-2);border:1px solid var(--rule);border-radius:4px;padding:0 5px}
 .ed-panel code{font-family:var(--mono);font-size:12.5px}
-.ed-chg{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:start;padding:8px 0;border-top:1px solid var(--rule-2)}
+.ed-chg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:start;padding:8px 0;border-top:1px solid var(--rule-2)}
+.ed-chg .k,.ed-chg .t{grid-column:1}
 .ed-chg:first-of-type{border-top:0}
 .ed-chg .k{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .ed-chg .k b{color:var(--accent-ink)}
 .ed-chg .t{color:var(--ink-2);overflow-wrap:anywhere}
 .ed-chg .t s{color:var(--muted)}
 .ed-chg .t .ar{color:var(--muted);margin:0 6px}
-.ed-chg .a{display:flex;gap:6px;grid-row:1/3}
+.ed-chg .a{display:flex;gap:6px;grid-column:2;grid-row:1/3}
 .ed-chg .a button{padding:4px 9px;font-size:12.5px}
 .ed-empty{color:var(--muted)}
 .ed-toast{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:12px;background:var(--ink);color:#fff;padding:10px 16px;border-radius:8px;box-shadow:0 6px 20px rgba(22,24,29,.25);max-width:min(92vw,560px)}

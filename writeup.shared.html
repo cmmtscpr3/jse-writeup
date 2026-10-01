@@ -1,16 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Project Toaster, Part 1: What we did</title>
-<meta name="description" content="How we built an agentic-AI system to monitor and predict the 2026 Johor State Election.">
-<!--
-  Self-contained article. No external scripts, fonts or images: everything is inline so the
-  file works offline. Images are base64 data URIs embedded from assets/ by tools/embed_assets.py.
-  Search for "PLACEHOLDER" to find the spots the author still needs to fill.
--->
-<style>
+<title>Project Toaster draft</title>
+<style data-fromhead>
 /* Layout: one reading column (680px) for prose, a wider 1040px track for figures, tables and
    the interactive pieces, both centred. Light theme only by design (the screenshots are light). */
 :root{
@@ -351,9 +340,311 @@ body.ed-on [data-ed-leaf] a{pointer-events:none}
 }
 @media (prefers-reduced-motion:reduce){.ed-flash{animation:none}}
 @media print{#ed-bar{display:none!important} body.ed-on{padding-bottom:0} body.ed-on [data-ed-leaf]{outline:none!important;background:none!important;box-shadow:none!important}}
+/* additions for the shared (claude.ai) draft */
+.ed-sync{color:var(--muted)}
+.ed-sync.busy{color:var(--accent-ink)}
+.ed-people{display:inline-flex;gap:4px;margin-left:10px;vertical-align:middle}
+.ed-people img{width:20px;height:20px;border-radius:50%;border:1px solid var(--rule)}
+body.ed-on [data-ed-leaf][data-ed-peer]{outline:2px solid var(--peer,var(--bn));outline-offset:3px;position:relative}
+body.ed-on [data-ed-leaf][data-ed-peer]::after{content:attr(data-ed-peer);position:absolute;top:-10px;right:8px;font-family:var(--sans);font-size:11px;font-weight:700;letter-spacing:.04em;background:var(--peer,var(--bn));color:#fff;padding:1px 7px;border-radius:999px;pointer-events:none}
+.ed-chg .ed-who{color:var(--muted);font-weight:500;text-transform:none;letter-spacing:0}
+.ed-chg .ed-who img{width:14px;height:14px;border-radius:50%;vertical-align:-2px;margin-right:3px}
+.ed-view{position:absolute;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));font-family:var(--sans);font-size:12.5px;color:var(--muted);background:var(--surface);border:1px solid var(--rule);border-radius:999px;padding:6px 12px}
 </style>
-</head>
-<body data-ed-build="20261001-025750">
+<script type="text/plain" data-editor id="ed-head" data-html-attrs=" lang=&quot;en&quot;">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Toaster, Part 1: What we did</title>
+<meta name="description" content="How we built an agentic-AI system to monitor and predict the 2026 Johor State Election.">
+<!--
+  Self-contained article. No external scripts, fonts or images: everything is inline so the
+  file works offline. Images are base64 data URIs embedded from assets/ by tools/embed_assets.py.
+  Search for "PLACEHOLDER" to find the spots the author still needs to fill.
+-->
+<style>
+/* Layout: one reading column (680px) for prose, a wider 1040px track for figures, tables and
+   the interactive pieces, both centred. Light theme only by design (the screenshots are light). */
+:root{
+  color-scheme: light;
+  --paper:#f2f3f1; --surface:#ffffff; --surface-2:#f7f8f6; --ink:#16181d; --ink-2:#3f434b; --muted:#646a72;
+  --rule:#dfe2e0; --rule-2:#eaece9;
+  --accent:#b1500a; --accent-ink:#8f3f05; --accent-bg:#fbeee0; --accent-line:#f1d3b3;
+  --bn:#2456b8; --ph:#c8213a; --pn:#0f7a55; --gov:#9a6b00;
+  --gA:#1f6b3a; --gA-bg:#e3f1e8; --gB:#3b4f7a; --gB-bg:#e4e8f1; --gC:#6f5200; --gC-bg:#f4ecd2; --gD:#4f565f; --gD-bg:#e8eaed;
+  --ext:#0b6b8a; --ext-bg:#dff0f6; --ext-line:#b7dbe8; --jud:#6d3fb3; --jud-bg:#efe8fa; --jud-line:#d9c9f1; --det:#4f565f; --det-bg:#e8eaed; --det-line:#d3d7dc;
+  --serif: "Charter", "Bitstream Charter", "Sitka Text", Cambria, Georgia, "Times New Roman", serif;
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: ui-monospace, Menlo, Consolas, "Liberation Mono", monospace;
+  --w:680px; --wide:1040px; --gutter:16px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--serif);font-size:18px;line-height:1.6;-webkit-font-smoothing:antialiased}
+#progress{position:fixed;top:0;left:0;right:0;height:4px;background:var(--rule);z-index:50}
+#progress i{display:block;height:100%;width:0;background:var(--accent);transition:width .1s linear}
+.skip{position:absolute;left:-9999px;top:8px;background:var(--ink);color:#fff;padding:8px 12px;border-radius:6px;font-family:var(--sans);z-index:60}
+.skip:focus{left:8px}
+.wrap{max-width:var(--w);margin:0 auto;padding:0 var(--gutter)}
+.wrap .wide{--ww:min(var(--wide),calc(100vw - 2*var(--gutter)));width:var(--ww);margin-left:calc(50% - var(--ww)/2)}
+h1,h2,h3,h4{font-family:var(--sans);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin:0;text-wrap:balance}
+h1{font-size:clamp(32px,5.2vw,48px);margin:10px 0 18px}
+h2{font-size:clamp(26px,3.6vw,34px);margin:68px 0 16px;padding-top:14px;border-top:3px solid var(--ink)}
+h2 .num{display:block;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+h3{font-size:22px;margin:40px 0 10px}
+h4{font-size:17px;margin:22px 0 6px}
+p{margin:0 0 18px}
+a{color:var(--accent-ink)}
+a:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:3px}
+strong{font-weight:700}
+.kicker{font-family:var(--sans);font-size:12px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);margin:56px 0 0}
+.standfirst{font-size:21px;line-height:1.5;color:var(--ink-2);margin:0 0 22px}
+.meta{font-family:var(--sans);display:flex;flex-wrap:wrap;gap:8px 18px;font-size:13.5px;color:var(--muted);padding:14px 0;border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);margin-bottom:26px}
+.meta b{color:var(--ink-2);font-weight:700}
+.ph-inline{color:var(--accent-ink);border-bottom:2px dashed var(--accent);font-weight:600}
+.pull{font-family:var(--sans);font-weight:700;font-size:clamp(21px,2.8vw,26px);letter-spacing:-.015em;line-height:1.3;color:var(--ink);border-left:4px solid var(--accent);padding:4px 0 4px 22px;margin:28px 0 30px;text-wrap:balance}
+.pull small{display:block;font-family:var(--sans);font-weight:400;font-size:14px;color:var(--muted);margin-top:10px;letter-spacing:0;text-wrap:pretty}
+.aside{font-family:var(--sans);font-size:15px;line-height:1.55;color:var(--ink-2);background:var(--surface);border:1px solid var(--rule);border-left:4px solid var(--ink);border-radius:8px;padding:14px 18px;margin:0 0 22px}
+.aside b{color:var(--ink)}
+.note{font-family:var(--sans);font-size:14px;color:var(--muted);line-height:1.5}
+ul,ol{padding-left:22px;margin:0 0 18px}
+li{margin-bottom:6px}
+figure{margin:28px 0}
+figcaption{font-family:var(--sans);font-size:14px;color:var(--muted);margin:10px auto 0;line-height:1.5;max-width:var(--w)}
+figcaption b{color:var(--ink-2);font-weight:700}
+.shot{display:block;width:100%;height:auto;border:1px solid var(--rule);border-radius:8px;background:#fff;cursor:zoom-in}
+.shot:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fig{position:relative}
+.fig .enl{position:absolute;right:10px;bottom:10px;font-family:var(--sans);font-size:11.5px;font-weight:700;letter-spacing:.04em;background:rgba(22,24,29,.82);color:#fff;padding:4px 8px;border-radius:6px;pointer-events:none}
+@media (hover:hover){.fig .enl{opacity:0;transition:opacity .15s}.fig:hover .enl,.fig:focus-within .enl{opacity:1}}
+.card{font-family:var(--sans);background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:18px 20px}
+.cards{display:grid;gap:14px;margin:0 0 24px}
+.cards.c3{grid-template-columns:repeat(3,1fr)}
+.cards.c2{grid-template-columns:repeat(2,1fr)}
+.card .t{font-weight:700;font-size:15.5px;margin-bottom:6px;color:var(--ink)}
+.card .d{font-size:14.5px;color:var(--ink-2);line-height:1.5}
+.chip{display:inline-block;font-family:var(--sans);font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;line-height:1.3;white-space:nowrap;vertical-align:middle}
+.chip.A{background:var(--gA-bg);color:var(--gA)} .chip.B{background:var(--gB-bg);color:var(--gB)} .chip.C{background:var(--gC-bg);color:var(--gC)} .chip.D{background:var(--gD-bg);color:var(--gD)} .chip.ns{background:var(--rule-2);color:#555b63}
+.chip.ext{background:var(--ext-bg);color:var(--ext);border:1px solid var(--ext-line)} .chip.jud{background:var(--jud-bg);color:var(--jud);border:1px solid var(--jud-line)} .chip.det{background:var(--det-bg);color:var(--det);border:1px solid var(--det-line)}
+/* who's who and terms */
+.who{font-family:var(--sans);background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px 20px;margin:0 0 24px;font-size:14.5px;line-height:1.5}
+.who h3{margin:0 0 10px;font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.who h3+dl{margin-bottom:14px}
+.who dl{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:0}
+.who dt{font-weight:700;color:var(--ink);white-space:nowrap}
+.who dd{margin:0;color:var(--ink-2)}
+.who dt i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:-1px}
+/* chain strip */
+.chain{font-family:var(--sans);display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin:0 0 24px}
+.chain .c{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 12px 12px;font-size:13.5px;line-height:1.4;color:var(--ink-2);position:relative}
+.chain .c b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.chain .c:not(:last-child)::after{content:"›";position:absolute;right:-9px;top:50%;transform:translateY(-50%);font-size:18px;color:var(--muted)}
+/* stat tiles */
+.stats{font-family:var(--sans);display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:0 0 24px}
+.stat{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.stat .v{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.1;color:var(--ink)}
+.stat .l{font-size:13px;color:var(--muted);margin-top:4px;line-height:1.4}
+/* tables */
+.tbl{font-family:var(--sans);width:100%;border-collapse:collapse;font-size:14.5px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;overflow:hidden}
+.tbl th,.tbl td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--rule-2);vertical-align:top}
+.tbl th{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);background:var(--surface-2);font-weight:700}
+.tbl tr:last-child td{border-bottom:none}
+.tbl td.num,.tbl th.num{font-variant-numeric:tabular-nums;text-align:right}
+.tbl .tier td{background:var(--surface-2);font-weight:700;color:var(--accent-ink);font-size:13px}
+.tblwrap{overflow-x:auto;margin:0 0 22px;border-radius:10px;position:relative}
+.tblwrap.scrolls{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 40px),transparent)}
+.scroll-hint{display:none;font-family:var(--sans);font-size:12.5px;color:var(--muted);margin:-16px 0 18px}
+.tblwrap.scrolls+.scroll-hint{display:block}
+.tbl .grade,.tbl th.grade{text-align:center;width:70px}
+/* placeholders */
+.ph{font-family:var(--sans);border:2px dashed var(--accent);background:var(--accent-bg);border-radius:10px;padding:14px 18px;margin:0 0 22px;color:var(--accent-ink);font-size:15px;line-height:1.5}
+.ph .lbl{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;background:var(--accent);color:#fff;padding:3px 8px;border-radius:5px;margin-bottom:8px;white-space:nowrap}
+.ph p{margin:0 0 8px}.ph p:last-child{margin:0}
+.ph ul{margin:6px 0 0}
+.ph.small{padding:10px 14px;font-size:14px}
+/* under the hood */
+details.hood{font-family:var(--sans);background:var(--det-bg);border:1px solid var(--det-line);border-radius:10px;margin:0 0 24px;overflow:hidden}
+details.hood>summary{cursor:pointer;list-style:none;padding:14px 18px;font-weight:700;font-size:15px;display:flex;align-items:center;gap:10px;color:var(--det)}
+details.hood>summary::-webkit-details-marker{display:none}
+details.hood>summary .tag{font-size:11px;letter-spacing:.1em;text-transform:uppercase;background:#fff;border:1px solid var(--det-line);border-radius:5px;padding:2px 7px;white-space:nowrap}
+details.hood>summary::after{content:"+";margin-left:auto;font-size:20px;font-weight:400;color:var(--muted)}
+details.hood[open]>summary::after{content:"–"}
+details.hood>summary:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+details.hood .body{padding:4px 18px 18px;font-size:15px;line-height:1.55;color:var(--ink-2);background:#fff;border-top:1px solid var(--det-line)}
+details.hood .body p{margin:12px 0}
+details.hood .body .tbl{font-size:13.5px}
+.eq{font-family:var(--mono);font-size:13.5px;line-height:1.6;background:var(--surface-2);border:1px solid var(--rule);border-radius:6px;padding:10px 12px;margin:10px 0;white-space:pre-wrap;overflow-wrap:anywhere;color:var(--ink)}
+.toolbar{font-family:var(--sans);display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
+.btn{font-family:var(--sans);font-size:13.5px;font-weight:600;padding:7px 12px;border-radius:7px;border:1px solid var(--rule);background:var(--surface);color:var(--ink-2);cursor:pointer}
+.btn:hover{border-color:var(--ink-2)}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.btn.on,.btn[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.btn.small{font-size:12.5px;padding:5px 10px}
+/* framework */
+.fw{font-family:var(--sans);display:grid;grid-template-columns:1fr auto 1fr auto 1fr;gap:10px;align-items:start;margin:0 0 10px}
+.fw .op{font-size:34px;font-weight:300;color:var(--muted);text-align:center;padding-top:26px}
+.fw .box{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px}
+.fw .box h4{margin:0 0 4px;font-size:20px}
+.fw .box .sub{font-size:13px;color:var(--muted);margin-bottom:10px}
+.fw .box.res{border:2px solid var(--ink)}
+.fwitem{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;font:inherit;font-size:14px;line-height:1.4;padding:9px 10px;margin:0 0 6px;border-radius:7px;border:1px solid var(--rule);background:var(--surface-2);cursor:pointer;color:var(--ink)}
+.fwitem::after{content:"›";font-size:18px;color:var(--muted);flex:none}
+.fwitem:hover{border-color:var(--accent)}
+.fwitem:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fwitem[aria-pressed="true"]{background:var(--accent-bg);border-color:var(--accent);color:var(--accent-ink)}
+.fwitem[aria-pressed="true"]::after{color:var(--accent)}
+#fw-out{font-family:var(--sans);min-height:52px;background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;font-size:14.5px;line-height:1.5;color:var(--ink-2);margin:0 0 24px}
+#fw-out b{color:var(--ink)}
+/* interfaces */
+.ifaces{font-family:var(--sans);display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 24px}
+.iface{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px;border-top:4px solid var(--accent)}
+.iface .n{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:800}
+.iface h3{margin:4px 0 8px;font-size:20px}
+.iface .row{font-size:13.5px;line-height:1.45;margin:6px 0;color:var(--ink-2)}
+.iface .row b{display:block;font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+/* toaster graphic */
+.toaster{font-family:var(--sans);position:relative;display:flex;gap:10px;align-items:flex-end;justify-content:center;margin:8px auto 8px;padding:0 24px 18px;max-width:640px}
+.toaster::before{content:"";position:absolute;left:0;right:0;bottom:0;height:64px;background:#2b2f36;border-radius:14px;z-index:0}
+.slice{position:relative;z-index:1;width:118px;height:92px;background:#f0d9a8;border:2px solid #c99a4b;border-radius:14px 14px 4px 4px;padding:22px 8px 0;text-align:center;font-size:13.5px;font-weight:700;color:#4a2f05}
+.slice.toasty{background:#e2b26a;border-color:#a56f1e}
+.slice small{display:block;font-weight:500;color:#5b3a06;font-size:11.5px;margin-top:3px}
+.dial{position:relative;z-index:1;width:84px;text-align:center;font-size:12.5px;color:#e8e6e0;padding-bottom:6px}
+.dial .knob{width:36px;height:36px;border-radius:50%;border:3px solid var(--accent);margin:0 auto 6px;position:relative;background:#fff}
+.dial .knob::after{content:"";position:absolute;left:50%;top:3px;width:3px;height:13px;background:var(--accent);transform:translateX(-50%) rotate(35deg);transform-origin:50% 100%}
+/* process lanes */
+.proc{font-family:var(--sans);display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:0 0 24px}
+.proc .lane{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px 16px}
+.proc .lane h3{margin:0 0 10px;font-size:18px;display:flex;align-items:center;gap:8px}
+.proc .lane h3 span{font-size:12px;background:var(--accent);color:#fff;border-radius:5px;padding:2px 7px}
+.steps{display:flex;flex-direction:column;gap:6px}
+.step{background:var(--surface-2);border:1px solid var(--rule);border-radius:7px;padding:8px 10px 8px 34px;font-size:14px;position:relative}
+.step::before{content:attr(data-n);position:absolute;left:10px;top:8px;font-size:12px;font-weight:800;color:var(--accent)}
+/* funnel */
+.funnel{font-family:var(--sans);display:grid;grid-template-columns:1fr;gap:6px;margin:0 0 24px}
+.funnel .lvl{border-radius:8px;padding:12px 14px;font-size:14.5px;border:1px solid var(--rule);background:var(--surface);line-height:1.45}
+.funnel .lvl.l2{margin:0 8%}.funnel .lvl.l3{margin:0 16%;border:2px solid var(--ink);font-weight:700;text-align:center;font-size:16px}
+.funnel .lvl b{display:block;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:3px;font-weight:700}
+/* pipeline diagram */
+.pipe{font-family:var(--sans);background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:14px;margin:0 0 10px;overflow-x:auto}
+.pipe .cols{display:grid;grid-template-columns:repeat(7,minmax(136px,1fr));gap:6px;min-width:1000px}
+.pipe .colhead{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 8px;font-weight:800;display:flex;align-items:flex-start;gap:6px;min-height:2.6em}
+.pipe .col:not(:last-child) .colhead::after{content:"›";margin-left:auto;font-size:16px;line-height:1;color:var(--muted)}
+.node{display:block;width:100%;text-align:left;font-family:var(--mono);font-size:11.5px;padding:7px 8px;margin:0 0 6px;border-radius:7px;border:1px solid var(--rule);background:var(--surface);color:var(--ink-2);cursor:pointer;line-height:1.3;white-space:normal;overflow-wrap:normal}
+.node small{display:block;font-family:var(--sans);font-size:10.5px;color:var(--muted);font-weight:500}
+.node.ext small{color:var(--ext)}.node.jud small{color:var(--jud)}.node.det small{color:var(--det)}.node.out small{color:#c9c5bc}
+.node.ext{background:var(--ext-bg);border-color:var(--ext-line);color:var(--ext)}
+.node.jud{background:var(--jud-bg);border-color:var(--jud-line);color:var(--jud)}
+.node.det{background:var(--det-bg);border-color:var(--det-line);color:var(--det)}
+.node.out{background:var(--ink);border-color:var(--ink);color:#fff}
+.node:hover{border-color:var(--accent)}
+.node:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.node[aria-pressed="true"]{box-shadow:0 0 0 2px var(--accent)}
+.node.rel-in{box-shadow:0 0 0 2px var(--accent);border-left:5px solid var(--accent)}
+.node.rel-out{box-shadow:0 0 0 2px var(--accent);border-right:5px solid var(--accent)}
+#pipe-out{font-family:var(--sans);background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 16px;font-size:14.5px;line-height:1.5;color:var(--ink-2);margin-bottom:22px;min-height:60px}
+#pipe-out b{color:var(--ink)}
+#pipe-out .io{display:block;margin-top:6px;font-size:13px;color:var(--muted)}
+#pipe-out .ex{color:var(--accent-ink);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-right:6px}
+.pipe-hint{display:none;font-family:var(--sans);font-size:13px;color:var(--muted);margin:-4px 0 10px}
+.kinds{font-family:var(--sans);display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 14px}
+.kind{background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:12px 14px;font-size:13.5px;color:var(--ink-2);line-height:1.45}
+.kind .chip{margin-bottom:6px}
+/* daily toast */
+.phone{max-width:460px;margin:0 auto 10px;background:#e3e6e2;border-radius:24px;padding:14px 12px;border:1px solid #d1d5d0}
+.bubble{font-family:var(--sans);background:#fff;border-radius:16px 16px 16px 4px;padding:14px 16px;font-size:14px;line-height:1.55;color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06)}
+.bubble .from{font-weight:800;color:var(--accent);font-size:13px;margin-bottom:6px}
+.bubble h3{font-size:13.5px;margin:12px 0 4px;letter-spacing:0}
+.bubble p{margin:0 0 8px}
+.bubble .time{font-size:11px;color:var(--muted);text-align:right;margin-top:6px}
+/* tabs */
+.tabs{font-family:var(--sans);display:flex;gap:6px;border-bottom:1px solid var(--rule);margin:0 0 14px;flex-wrap:wrap}
+.tab{font:inherit;font-size:14px;font-weight:600;padding:8px 12px;background:none;border:none;border-bottom:3px solid transparent;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+.tab[aria-pressed="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+/* timeline chart */
+.chartbox{font-family:var(--sans);background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px;margin:0 0 22px}
+.tl-scroll{position:relative;cursor:crosshair}
+.chartbox svg{width:100%;height:auto;display:block}
+.readout{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:12px}
+.readout .r{background:var(--surface-2);border:1px solid var(--rule-2);border-radius:8px;padding:8px 10px;min-width:0}
+.readout .r .k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.readout .r .v{font-size:19px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.readout .r .v small{font-size:12px;font-weight:500;color:var(--muted)}
+.scrub{display:flex;align-items:center;gap:12px;margin-top:12px;flex-wrap:wrap}
+.scrub input[type=range]{flex:1;min-width:180px;accent-color:var(--accent)}
+.scrub input[type=range]:focus-visible{outline:3px solid var(--accent);outline-offset:4px}
+.scrub .when{font-size:14px;font-weight:700;min-width:170px}
+.ttip{position:absolute;bottom:44px;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;padding:6px 8px;border-radius:5px;white-space:nowrap;transform:translate(-50%,0);display:none;z-index:5}
+#tl-table{display:none;margin-top:12px;max-height:420px;overflow:auto;border:1px solid var(--rule);border-radius:8px}
+#tl-table table{border:none;border-radius:0;overflow:visible}
+#tl-table thead th{position:sticky;top:0;z-index:1;background:var(--surface-2)}
+#tl-table td:first-child{white-space:nowrap}
+#tl-capnote{display:none;margin:12px 0 0}
+/* lightbox */
+#lb{position:fixed;inset:0;background:rgba(18,20,24,.94);display:none;z-index:100}
+#lb.on{display:block}
+#lb .pan{position:absolute;inset:0 0 0 0;overflow:auto;padding:16px 16px 120px;cursor:zoom-out;display:grid;place-items:center}
+#lb img{display:block;margin:0 auto;width:max(100%,1100px);max-width:none;height:auto;border-radius:6px;background:#fff}
+#lb .bar{position:absolute;left:0;right:0;bottom:0;max-height:34vh;display:flex;align-items:flex-start;gap:12px;padding:10px 16px;color:#ddd;font-family:var(--sans);font-size:13px;line-height:1.4;background:rgba(18,20,24,.96)}
+#lb .bar .cap{flex:1;overflow:auto;max-height:calc(34vh - 20px)}
+#lb .close{font-family:var(--sans);font-size:14px;font-weight:700;background:#fff;color:var(--ink);border:none;border-radius:6px;padding:6px 12px;cursor:pointer;flex:none}
+#lb .close:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+/* TOC */
+.toc{font-family:var(--sans);background:var(--surface);border:1px solid var(--rule);border-radius:10px;padding:16px 20px;margin:0 0 30px;font-size:14.5px}
+.toc b{display:block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.toc ol{margin:0;padding-left:20px;columns:2;column-gap:24px}
+.toc li{break-inside:avoid;margin-bottom:4px}
+.toc a{text-decoration:none;color:var(--ink-2)}.toc a:hover{color:var(--accent-ink);text-decoration:underline}
+.guide{font-family:var(--sans);display:flex;gap:14px;align-items:flex-start;background:var(--accent-bg);border:1px solid var(--accent-line);border-radius:10px;padding:14px 18px;margin:0 0 22px;font-size:14.5px;line-height:1.5;color:var(--accent-ink)}
+.guide .ic{font-size:26px;line-height:1}
+footer{margin:70px 0 60px}
+footer .in{padding-top:18px;border-top:1px solid var(--rule);font-family:var(--sans);font-size:13.5px;color:var(--muted);line-height:1.5}
+.assump{font-family:var(--sans);display:grid;grid-template-columns:1fr;gap:8px;margin:0 0 6px}
+.assump .a{background:var(--surface);border:1px solid var(--rule);border-radius:8px;padding:9px 12px;font-size:14.5px;line-height:1.5;display:flex;gap:10px;align-items:flex-start}
+.assump .a .n{font-size:11px;font-weight:800;color:var(--accent);min-width:22px;padding-top:4px}
+.assump .a.core{border-color:var(--accent);background:var(--accent-bg)}
+.grp{font-family:var(--sans);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:800;margin:14px 0 6px}
+.next{font-family:var(--sans);background:var(--surface);border:2px solid var(--ink);border-radius:10px;padding:18px 20px;margin:0 0 24px}
+.next h3{margin:0 0 8px;font-size:18px}
+.next ul{margin:0;font-size:15px;line-height:1.5}
+@media (max-width:820px){
+  .cards.c3,.cards.c2,.ifaces,.proc,.kinds{grid-template-columns:1fr}
+  .chain{grid-template-columns:1fr 1fr}
+  .chain .c:not(:last-child)::after{display:none}
+  .fw{grid-template-columns:1fr}.fw .op{padding:0}
+  .toc ol{columns:1}
+  h2{margin-top:50px}
+  body{font-size:17px}
+  .readout{grid-template-columns:repeat(2,1fr)}
+  .pipe .cols{display:flex;flex-direction:column;min-width:0;gap:14px}
+  .pipe .col{display:flex;flex-wrap:wrap;gap:6px}
+  .pipe .colhead{width:100%;margin:0;min-height:0}
+  .pipe .col:not(:last-child) .colhead::after{content:"↓";margin-left:6px}
+  .node{width:auto;margin:0}
+  .node small{font-size:11.5px}
+  .pipe-hint{display:block}
+  .toaster{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 12px;background:#2b2f36;border-radius:14px}
+  .toaster::before{display:none}
+  .slice{width:auto;height:84px;border-radius:12px}
+  .dial{grid-column:1/-1;width:100%;padding:4px 0 0}
+  .who dl{grid-template-columns:1fr}.who dt{margin-top:6px}
+  #lb img{width:1000px}
+  details.hood>summary{flex-wrap:wrap;gap:6px 10px}
+  details.hood>summary .tag{flex:0 0 auto}
+}
+@media (max-width:600px){
+  .fig .enl{display:none}
+  .tbl.stack thead{position:absolute;left:-9999px}
+  .tbl.stack tr{display:block;padding:10px 12px;border-bottom:1px solid var(--rule-2)}
+  .tbl.stack tr:last-child{border-bottom:none}
+  .tbl.stack td{display:block;padding:2px 0;border:none}
+  .tbl.stack td[data-l]::before{content:attr(data-l);display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+  .tbl.stack .grade,.tbl.stack th.grade{width:auto;text-align:left}
+  .tbl.stack .tier td{padding:4px 0}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}#progress i{transition:none}.fig .enl{transition:none}}
+@media print{#progress,#lb{display:none}details.hood{break-inside:avoid}.pipe .cols{min-width:0;grid-template-columns:repeat(7,1fr);gap:4px}.node{font-size:9px}.tab{display:none}}
+</style>
+</script>
 <a class="skip" href="#main">Skip to content</a>
 <div id="progress" aria-hidden="true"><i></i></div>
 
@@ -1276,54 +1567,53 @@ body.ed-on [data-ed-leaf] a{pointer-events:none}
 })();
 </script>
 <div id="ed-bar" data-editor>
-  <button type="button" class="ed-pill" id="ed-open" title="Edit the text of this draft in place">✎ Edit this draft<span class="ed-n" id="ed-pill-n" hidden></span></button>
+  <button type="button" class="ed-pill" id="ed-open" title="Edit the text of this draft in place" hidden>✎ Edit this draft<span class="ed-n" id="ed-pill-n" hidden></span></button>
   <div class="ed-tools" id="ed-tools" hidden>
-    <div class="ed-status"><b>Editing</b> · <span id="ed-count">no changes</span><span class="ed-warn" id="ed-warn"></span></div>
+    <div class="ed-status"><b>Editing</b> · <span id="ed-count">no changes</span> · <span id="ed-sync" class="ed-sync">connecting…</span><span id="ed-people" class="ed-people"></span><span class="ed-warn" id="ed-warn"></span></div>
     <div class="ed-btns">
       <button type="button" id="ed-changes" aria-expanded="false" aria-controls="ed-panel">Changes</button>
+      <button type="button" id="ed-comment" title="Open a comment on the paragraph you last clicked" hidden>Comment</button>
       <button type="button" id="ed-help" aria-expanded="false" aria-controls="ed-helpbox">How to edit</button>
-      <button type="button" id="ed-discard">Discard all</button>
-      <button type="button" id="ed-save" title="Download writeup.editable.html with your edits baked in, to continue later or send back">Save working copy</button>
-      <button type="button" id="ed-export" class="ed-primary" title="Download the clean writeup.html, without the editor">Export final</button>
+      <button type="button" id="ed-export" class="ed-primary" title="Download the clean writeup.html, without the editor" hidden>Export final</button>
       <button type="button" id="ed-done">Done</button>
     </div>
   </div>
   <div class="ed-panel" id="ed-panel" hidden></div>
   <div class="ed-panel" id="ed-helpbox" hidden>
-    <b>How to edit</b>
+    <b>How to edit together</b>
     <ul>
-      <li>Click any paragraph, heading, caption, list item or table cell and type. Links, buttons, charts and the diagram stay locked; ask Claude for structural changes.</li>
-      <li><kbd>Enter</kbd> starts a new paragraph or list item. <kbd>Shift</kbd>+<kbd>Enter</kbd> is a line break. <kbd>Backspace</kbd> in an empty paragraph deletes it.</li>
-      <li><kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>B</kbd> bold, <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>I</kbd> italic. Pasted text comes in as plain text.</li>
+      <li>Click any paragraph, heading, caption, list item or table cell and type. Every change is saved to this page as you go and shows up for everyone who has it open. Links, buttons, charts and the diagram stay locked; ask Claude for structural changes.</li>
+      <li>A name tag on a paragraph means someone else is editing it right now. If two people change the same paragraph, the last one to leave it wins, so wait for the tag to clear.</li>
+      <li><kbd>Enter</kbd> starts a new paragraph or list item. <kbd>Shift</kbd>+<kbd>Enter</kbd> is a line break. <kbd>Backspace</kbd> in an empty paragraph deletes it. <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>B</kbd> bold, <kbd>Ctrl</kbd>/<kbd>⌘</kbd>+<kbd>I</kbd> italic. Pasted text comes in as plain text.</li>
       <li>Amber boxes are placeholders. <b>Replace with text</b> swaps the box for a paragraph, <b>Add image</b> inserts a figure above it, <b>Delete box</b> removes it. The ✓ beside an amber underline marks that text as final.</li>
-      <li>Edits autosave in this browser only. <b>Save working copy</b> downloads <code>writeup.editable.html</code> with your edits baked in: open that file to continue on another machine, or send it to Claude. <b>Export final</b> downloads the clean <code>writeup.html</code>.</li>
-      <li><b>Changes</b> lists what you touched, with a revert button for each. <b>Discard all</b> throws away every unsaved edit in this browser.</li>
+      <li><b>Comment</b> opens a comment thread on the paragraph you last clicked; comments live in this page's comment panel, not in the article.</li>
+      <li><b>Changes</b> lists every change with who made it and a revert button. <b>Export final</b> downloads the clean <code>writeup.html</code>; Claude can also pull the current state straight from this page.</li>
     </ul>
   </div>
   <div class="ed-toast" id="ed-toast" role="status" hidden></div>
   <input type="file" id="ed-file" accept="image/*" hidden>
 </div>
 <script data-editor id="ed-main">
-// Draft editor for writeup.editable.html. Runs after the article's own script.
-// Model: the pristine document (captured by pre.js) + an ordered log of structural ops + a map of
-// per-block innerHTML edits. The live page is only the editing surface; both exports replay the log
-// onto a fresh copy of the pristine document.
+// Shared draft editor for the claude.ai copy (writeup.shared.html). Runs after the article's script.
+// Same block model as editor.js (pre.js assigns data-ed ids and keeps a pristine snapshot), but the
+// state lives in the page's shared database: blocks/<id> = {html, by, at} for text edits, and
+// ops/<opId> = {t, id, ref, pos, tag, cls, html, leaf, by, at} as an append-only log of structural
+// changes (add, rm, restore, unph, reph). Every view subscribes to both and applies what it has
+// not seen; reverts write inverse entries. Exports replay the log onto the pristine snapshot.
 (function () {
   'use strict';
   var ED = window.__ED; if (!ED || !ED.pristine) return;
-  var BUILD = document.body.getAttribute('data-ed-build') || '0';
-  var KEY = 'toaster-edit:' + BUILD;
   var LEAF = '[data-ed-leaf]';
   var $ = function (s, r) { return (r || document).querySelector(s); };
   var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   var byId = function (root, id) { return root.querySelector('[data-ed="' + id + '"]'); };
   var state = { ops: [], edits: {} };
-  var orig = {}, baked = { removed: [], final: [] };   // from a saved working copy, if this is one
-  var on = false, saveTimer = null, discarded = false;
-  var TOOLBAR_HTML = $('#ed-bar').outerHTML;    // clean copy for saved working copies
-  // pre.js snapshots the page before the parser reaches the article's own script, so graft every
-  // later non-editor script into the snapshot (script elements are never changed at runtime)
-  (function () { var live = $$('body > script:not([data-editor])'), pr = $$('body > script:not([data-editor])', ED.pristine), pb = ED.pristine.querySelector('body'); for (var i = pr.length; i < live.length; i++) { pb.appendChild(document.createTextNode('\n')); pb.appendChild(live[i].cloneNode(true)); } pb.appendChild(document.createTextNode('\n')); })();
+  var seenOps = {}, pending = 0, timers = {};
+  var caps = {}, me = null, canWrite = null, on = false, focusedId = null, lastLeaf = null, readOnly = false;
+  var peerColors = {};
+
+  // graft the article's own script (parsed after the snapshot) into the pristine copy
+  (function () { var live = $$('body > script:not([data-editor])'), pr = $$('body > script:not([data-editor])', ED.pristine), pb = ED.pristine.querySelector('body'); for (var i = pr.length; i < live.length; i++) { pb.appendChild(document.createTextNode('\n')); pb.appendChild(live[i].cloneNode(true)); } })();
 
   // ---------- html helpers
   function cleanHTML(el) { var c = el.cloneNode(true); $$('[data-editor]', c).forEach(function (x) { x.remove(); }); return c.innerHTML; }
@@ -1332,156 +1622,210 @@ body.ed-on [data-ed-leaf] a{pointer-events:none}
   function snip(t, n) { t = (t || '').replace(/\s+/g, ' ').trim(); return t.length > (n || 90) ? t.slice(0, n || 90) + '…' : t; }
   function esc(t) { return (t || '').replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function pristineHTML(id) { var p = byId(ED.pristine, id); return p ? cleanHTML(p) : null; }
-  function origHTML(id) { return (id in orig) ? orig[id] : pristineHTML(id); }   // what Changes compares against
+  function baseHTML(id) { var p = pristineHTML(id); if (p !== null) return p; var op = null; state.ops.forEach(function (o) { if (o.t === 'add' && o.id === id) op = o; }); return op ? (op.html || '') : null; }
   function newId() { return 'n' + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }
-  function stamp() { return new Date().toISOString().replace(/[-:]/g, '').slice(0, 15).replace('T', '-') + '-' + Math.floor(Math.random() * 46656).toString(36); }
-  function isAdded(id) { return pristineHTML(id) === null || (id in orig && orig[id] === null); }
+  function isAdded(id) { return pristineHTML(id) === null; }
   function placeholderComment(el) {
-    // the <!-- PLACEHOLDER --> note sits before the box, or before an ancestor of an inline placeholder
     var e = el;
     for (var lvl = 0; lvl < 3 && e; lvl++, e = e.parentElement) {
       for (var s = e.previousSibling; s; s = s.previousSibling) {
         if (s.nodeType === 3 && !/\S/.test(s.nodeValue)) continue;
         if (s.nodeType === 8 && /PLACEHOLDER/.test(s.nodeValue)) return s;
-        if (s.nodeType === 1 && s.hasAttribute('data-ed') && isAdded(s.getAttribute('data-ed'))) continue;   // look past blocks inserted in front of the box
+        if (s.nodeType === 1 && s.hasAttribute('data-ed') && isAdded(s.getAttribute('data-ed'))) continue;
         break;
       }
     }
     return null;
   }
   function dropComment(el) { var c = placeholderComment(el); if (c) c.remove(); }
+  function placeLike(root, p, el) {
+    var s, live;
+    for (s = p.previousElementSibling; s; s = s.previousElementSibling) if (s.hasAttribute('data-ed') && (live = byId(root, s.getAttribute('data-ed')))) { live.insertAdjacentElement('afterend', el); return true; }
+    for (s = p.nextElementSibling; s; s = s.nextElementSibling) if (s.hasAttribute('data-ed') && (live = byId(root, s.getAttribute('data-ed')))) { live.insertAdjacentElement('beforebegin', el); return true; }
+    for (var par = p.parentElement; par; par = par.parentElement) {
+      if (par.id && (live = root.querySelector('#' + CSS.escape(par.id)))) { live.appendChild(el); return true; }
+      if (par.hasAttribute('data-ed') && (live = byId(root, par.getAttribute('data-ed')))) { live.appendChild(el); return true; }
+    }
+    return false;
+  }
 
-  // ---------- replaying the log onto any root (live document or a pristine copy)
-  function apply(root, ops, edits) {
-    ops.forEach(function (op) {
-      var el = byId(root, op.id), ref;
-      if (op.t === 'add') {
-        ref = byId(root, op.ref); if (!ref) { console.warn('editor: anchor missing for', op); return; }
-        var n = document.createElement(op.tag); if (op.cls) n.className = op.cls;
-        n.setAttribute('data-ed', op.id); if (op.leaf) n.setAttribute('data-ed-leaf', '1');
-        n.innerHTML = op.html || '';
-        ref.insertAdjacentElement(op.pos === 'before' ? 'beforebegin' : 'afterend', n);
-      } else if (op.t === 'rm') { if (el) { dropComment(el); el.remove(); } }
-      else if (op.t === 'unph') { if (el) { dropComment(el); el.classList.remove('ph-inline'); if (!el.className) el.removeAttribute('class'); } }
-      else if (op.t === 'reph') { if (el) el.classList.add('ph-inline'); }
+  // ---------- replaying the log
+  function applyOp(root, op) {
+    var el = byId(root, op.id), ref;
+    if (op.t === 'add') {
+      if (el) return;
+      ref = byId(root, op.ref); if (!ref) { console.warn('editor: anchor missing', op); return; }
+      var n = document.createElement(op.tag); if (op.cls) n.className = op.cls;
+      n.setAttribute('data-ed', op.id); if (op.leaf) n.setAttribute('data-ed-leaf', '1');
+      n.innerHTML = op.html || '';
+      ref.insertAdjacentElement(op.pos === 'before' ? 'beforebegin' : 'afterend', n);
+      if (root === document) { enableLeaves(n); if (state.edits[op.id]) n.innerHTML = state.edits[op.id].html; }
+    } else if (op.t === 'rm') { if (el) { dropComment(el); el.remove(); } }
+    else if (op.t === 'restore') { if (el) return; var p = byId(ED.pristine, op.id); if (!p) return; var c = p.cloneNode(true); if (placeLike(root, p, c)) { var cm = placeholderComment(p); if (cm) c.parentNode.insertBefore(cm.cloneNode(), c); if (root === document) { enableLeaves(c); phActions(on, c); } } }
+    else if (op.t === 'unph') { if (el) { dropComment(el); el.classList.remove('ph-inline'); if (!el.className) el.removeAttribute('class'); } }
+    else if (op.t === 'reph') { if (el) el.classList.add('ph-inline'); }
+  }
+  function applyAll(root) {
+    state.ops.forEach(function (op) { applyOp(root, op); });
+    Object.keys(state.edits).forEach(function (id) { var el = byId(root, id); if (el) el.innerHTML = state.edits[id].html; });
+  }
+
+  // ---------- shared store
+  function setSync(t, busy) { var s = $('#ed-sync'); s.textContent = t; s.classList.toggle('busy', !!busy); }
+  function writeFail(e) {
+    pending--; setSync(pending ? 'saving…' : 'save failed', true);
+    if (e && e.code === 'invalid_argument' && canWrite !== true) setReadOnly('You can read this draft but not change it. Ask the owner for Contributor access.');
+    else if (e && e.code === 'quota_exceeded') toast('The page’s database is full; ask Claude to tidy it.');
+    else toast('Could not save (' + ((e && e.code) || 'error') + '). Check your connection and try again.');
+  }
+  function writeDone() { pending--; setSync(pending ? 'saving…' : 'all changes saved', pending > 0); }
+  function writeOp(op) {
+    if (!caps.db) return;
+    var ref = caps.db.collection('ops').doc(); op._id = ref.id; op.by = me; op.at = Date.now();
+    seenOps[ref.id] = true; state.ops.push(op);
+    var body = {}; Object.keys(op).forEach(function (k) { if (k !== '_id') body[k] = op[k]; });
+    pending++; setSync('saving…', true);
+    ref.set(body).then(writeDone, writeFail);
+  }
+  function writeEdit(id, html) {
+    if (!caps.db) return;
+    var base = baseHTML(id), ref = caps.db.doc('blocks/' + id);
+    pending++; setSync('saving…', true);
+    if (base !== null && norm(html) === norm(base)) { delete state.edits[id]; ref.delete().then(writeDone, writeFail); }
+    else { state.edits[id] = { html: html, by: me, at: Date.now() }; ref.set(state.edits[id]).then(writeDone, writeFail); }
+  }
+  function subscribe() {
+    var db = caps.db, ready = 0;
+    function first() { if (++ready === 2) { setSync('all changes saved'); refreshMarks(); renderChanges(); if (readOnly) return; $('#ed-open').hidden = canWrite === false; } }
+    db.collection('ops').orderBy('at').onSnapshot(function (snap) {
+      var reset = false;
+      snap.docChanges().forEach(function (ch) {
+        if (ch.type === 'added') { var op = ch.doc.data(); if (seenOps[ch.doc.id]) return; seenOps[ch.doc.id] = true; op = Object.assign({}, op, { _id: ch.doc.id }); state.ops.push(op); applyOp(document, op); }
+        else if (ch.type === 'removed') reset = true;
+      });
+      if (reset) toast('The draft was reset outside this page. Reload to see its current state.', 20000);
+      if (ready < 2) first(); else { refreshMarks(); renderChanges(); }
+    }, function (e) { setSync('live updates lost (' + e.code + '); reload', true); });
+    db.collection('blocks').onSnapshot(function (snap) {
+      snap.docChanges().forEach(function (ch) {
+        var id = ch.doc.id, el = byId(document, id);
+        if (ch.type === 'removed') {
+          if (state.edits[id] && state.edits[id].by === me && ch.doc.metadata.hasPendingWrites) return;
+          delete state.edits[id];
+          if (el && id !== focusedId) { var b = baseHTML(id); if (b !== null) el.innerHTML = b; }
+        } else {
+          var d = ch.doc.data(); state.edits[id] = d;
+          if (!el) return;
+          if (id === focusedId) { if (d.by !== me) toast('Someone else just changed the paragraph you are in. Your version replaces theirs when you leave it.', 8000); return; }
+          if (norm(cleanHTML(el)) !== norm(d.html)) el.innerHTML = d.html;
+        }
+      });
+      if (ready < 2) first(); else { refreshMarks(); renderChanges(); }
+    }, function (e) { setSync('live updates lost (' + e.code + '); reload', true); });
+  }
+
+  // ---------- people
+  var profileCache = {};
+  function names(ids, cb) {
+    ids = ids.filter(function (x, i, a) { return x && a.indexOf(x) === i; });
+    if (!caps.user || !ids.length) { cb({}); return; }
+    caps.user.profiles(ids).then(function (ps) { Object.keys(ps).forEach(function (k) { profileCache[k] = ps[k]; }); cb(ps); }, function () { cb({}); });
+  }
+  function nameOf(id, ps) { if (id === me) return 'you'; var p = (ps && ps[id]) || profileCache[id]; return (p && p.name) || 'Someone'; }
+  function avatarOf(id, ps) { var p = (ps && ps[id]) || profileCache[id]; return p ? p.avatarUrl : ''; }
+  function renderPeers() {
+    if (!caps.room) return;
+    var peers = caps.room.peers().filter(function (p) { return !p.isMe && p.kind === 'viewer'; });
+    $$('[data-ed-peer]').forEach(function (el) { el.removeAttribute('data-ed-peer'); el.style.removeProperty('--peer'); });
+    var ids = peers.map(function (p) { return p.by || (p.presence && p.presence.uid) || null; });
+    names(ids, function (ps) {
+      var strip = $('#ed-people'); strip.innerHTML = '';
+      peers.forEach(function (p, i) {
+        var id = ids[i], nm = nameOf(id, ps), av = avatarOf(id, ps), col = (ps[id] && ps[id].color) || '';
+        if (av) { var img = document.createElement('img'); img.src = av; img.alt = nm; img.title = nm + ' is here'; strip.appendChild(img); }
+        var ed = p.presence && p.presence.editing; if (ed) { var el = byId(document, ed); if (el) { el.setAttribute('data-ed-peer', nm); if (col) el.style.setProperty('--peer', col); } }
+      });
     });
-    Object.keys(edits).forEach(function (id) { var el = byId(root, id); if (el) el.innerHTML = edits[id]; });
   }
-
-  // ---------- draft persistence (this browser only)
-  function save() {
-    if (discarded) return;
-    try { localStorage.setItem(KEY, JSON.stringify(state)); setWarn(''); }
-    catch (e) { setWarn('Autosave failed: the draft is too large for this browser (images count). Use “Save working copy”.'); }
-  }
-  function scheduleSave() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); }
-  function load() {
-    try { var s = JSON.parse(localStorage.getItem(KEY) || 'null'); if (s && s.ops && s.edits) state = s; } catch (e) { }
-    var j = $('#ed-orig');
-    if (j) { try { var o = JSON.parse(j.textContent); orig = o.orig || {}; (o.added || []).forEach(function (id) { orig[id] = null; }); baked.removed = o.removed || []; baked.final = o.final || []; } catch (e) { } }
-  }
+  function setPresence(editing) { if (caps.room) caps.room.presence({ editing: editing || null, uid: me || null }).catch(function () { }); }
 
   // ---------- change tracking
-  function isChanged(id, el) { var o = origHTML(id); if (o === null) return true; return norm(cleanHTML(el)) !== norm(o); }
+  function isChanged(id, el) { var b = pristineHTML(id); if (b === null) return true; return norm(cleanHTML(el)) !== norm(b); }
   function recordEdit(leaf) {
-    var id = leaf.getAttribute('data-ed'), h = cleanHTML(leaf).replace(/\u00a0/g, ' '), p = pristineHTML(id);   // browsers type trailing spaces as nbsp
-    if (p !== null && norm(h) === norm(p)) delete state.edits[id]; else state.edits[id] = h;
+    var id = leaf.getAttribute('data-ed'), h = cleanHTML(leaf).replace(/ /g, ' ');
     leaf.toggleAttribute('data-ed-changed', isChanged(id, leaf));
-    scheduleSave(); updateCount();
+    clearTimeout(timers[id]); timers[id] = setTimeout(function () { writeEdit(id, h); updateCount(); }, 700);
+    updateCount();
   }
-  function refreshMarks() { $$(LEAF).forEach(function (el) { el.toggleAttribute('data-ed-changed', isChanged(el.getAttribute('data-ed'), el)); }); updateCount(); }
+  function flushEdit(leaf) { var id = leaf.getAttribute('data-ed'); if (timers[id]) { clearTimeout(timers[id]); delete timers[id]; writeEdit(id, cleanHTML(leaf).replace(/ /g, ' ')); } }
+  function refreshMarks() { $$(LEAF).forEach(function (el) { if (!el.closest('[data-editor]')) el.toggleAttribute('data-ed-changed', isChanged(el.getAttribute('data-ed'), el)); }); updateCount(); }
   function sectionOf(el) {
     var sec = el.closest('section'); var k = sec && sec.querySelector('h2 .num');
     if (k) return k.textContent.trim(); if (el.closest('header')) return 'Top'; if (el.closest('footer')) return 'Footer'; return '';
   }
+  function lastOpFor(id) { var r = null; state.ops.forEach(function (o) { if (o.id === id) r = o; }); return r; }
   function changes() {
-    var out = [], addedIds = {};
-    state.ops.forEach(function (o) { if (o.t === 'add') addedIds[o.id] = o; });
+    var out = [];
     $$(LEAF).forEach(function (el) {
       if (el.closest('[data-editor]')) return;
       var id = el.getAttribute('data-ed'); if (!isChanged(id, el)) return;
-      var o = origHTML(id);
-      out.push({ kind: o === null ? 'Added' : 'Edited', id: id, el: el, before: textOf(o), after: el.textContent, sec: sectionOf(el) });
+      var added = isAdded(id), e = state.edits[id], o = added ? lastOpFor(id) : null;
+      out.push({ kind: added ? 'Added' : 'Edited', id: id, el: el, before: textOf(pristineHTML(id)), after: el.textContent, sec: sectionOf(el), by: e ? e.by : (o ? o.by : null), at: e ? e.at : (o ? o.at : 0) });
     });
-    Object.keys(addedIds).forEach(function (id) { var o = addedIds[id]; if (o.tag === 'figure') { var el = byId(document, id); if (el) out.push({ kind: 'Added image', id: id, el: el, after: '', sec: sectionOf(el), op: o }); } });
-    state.ops.forEach(function (o) {
-      if (o.t === 'rm') { var p = byId(ED.pristine, o.id); if (p) out.push({ kind: 'Removed', id: o.id, before: p.textContent, pristine: p, sec: sectionOf(p) }); }
-      if (o.t === 'unph') { var el = byId(document, o.id); if (el) out.push({ kind: 'Marked final', id: o.id, el: el, after: el.textContent, sec: sectionOf(el) }); }
+    $$('figure[data-ed]').forEach(function (el) { var id = el.getAttribute('data-ed'); if (isAdded(id)) { var o = lastOpFor(id); out.push({ kind: 'Added image', id: id, el: el, after: '', sec: sectionOf(el), by: o && o.by, at: o ? o.at : 0 }); } });
+    $$('[data-ed]', ED.pristine).forEach(function (p) {
+      var id = p.getAttribute('data-ed'); if (byId(document, id)) return;
+      for (var a = p.parentElement; a; a = a.parentElement) if (a.hasAttribute('data-ed') && !byId(document, a.getAttribute('data-ed'))) return;   // inside a removed box
+      var o = lastOpFor(id); out.push({ kind: 'Removed', id: id, before: p.textContent, pristine: p, sec: sectionOf(p), by: o && o.by, at: o ? o.at : 0 });
     });
-    Object.keys(orig).forEach(function (id) { if (orig[id] !== null || addedIds[id]) return; var el = byId(document, id); if (el && el.tagName === 'FIGURE') out.push({ kind: 'Added image', id: id, el: el, after: '', sec: sectionOf(el) }); });
-    baked.final.forEach(function (id) { var el = byId(document, id); if (el && !el.classList.contains('ph-inline') && !state.ops.some(function (o) { return o.t === 'reph' && o.id === id; })) out.push({ kind: 'Marked final', id: id, el: el, after: el.textContent, sec: sectionOf(el), baked: true }); });
-    baked.removed.forEach(function (r) { if (!addedIds[r.id] && !byId(document, r.id)) out.push({ kind: 'Removed', id: r.id, before: textOf(r.html), baked: r, sec: r.sec || '' }); });
+    $$('.ph-inline[data-ed]', ED.pristine).forEach(function (p) { var id = p.getAttribute('data-ed'), el = byId(document, id); if (el && !el.classList.contains('ph-inline')) { var o = lastOpFor(id); out.push({ kind: 'Marked final', id: id, el: el, after: el.textContent, sec: sectionOf(el), by: o && o.by, at: o ? o.at : 0 }); } });
     return out;
   }
   function updateCount() {
     var n = changes().length, t = n === 0 ? 'no changes' : n + (n === 1 ? ' change' : ' changes');
     $('#ed-count').textContent = t;
     var pn = $('#ed-pill-n'); pn.hidden = n === 0; pn.textContent = n;
-    document.title = (n ? '✎ ' : '') + document.title.replace(/^✎ /, '');
   }
-  function setWarn(t) { $('#ed-warn').textContent = t; }
+  function ago(t) { if (!t) return ''; var s = Math.round((Date.now() - t) / 1000); if (s < 60) return 'just now'; if (s < 3600) return Math.round(s / 60) + ' min ago'; if (s < 86400) return Math.round(s / 3600) + ' h ago'; return new Date(t).toLocaleDateString(); }
   var toastTimer;
   function toast(msg, ms) { var t = $('#ed-toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(function () { t.hidden = true; }, ms || 6000); }
 
-  // ---------- revert
-  function placeLike(p, el) {
-    var s, live;
-    for (s = p.previousElementSibling; s; s = s.previousElementSibling) if (s.hasAttribute('data-ed') && (live = byId(document, s.getAttribute('data-ed')))) { live.insertAdjacentElement('afterend', el); return true; }
-    for (s = p.nextElementSibling; s; s = s.nextElementSibling) if (s.hasAttribute('data-ed') && (live = byId(document, s.getAttribute('data-ed')))) { live.insertAdjacentElement('beforebegin', el); return true; }
-    for (var par = p.parentElement; par; par = par.parentElement) {
-      if (par.id && (live = document.getElementById(par.id))) { live.appendChild(el); return true; }
-      if (par.hasAttribute('data-ed') && (live = byId(document, par.getAttribute('data-ed')))) { live.appendChild(el); return true; }
-    }
-    return false;
-  }
+  // ---------- revert = inverse write
   function revert(c) {
-    if (c.kind === 'Edited') { c.el.innerHTML = origHTML(c.id); recordEdit(c.el); }
-    else if (c.kind === 'Added' || c.kind === 'Added image') {
-      if (pristineHTML(c.id) === null) {                       // added this session: drop the op
-        state.ops = state.ops.filter(function (o) { return !(o.t === 'add' && o.id === c.id); });
-        $$('[data-ed]', c.el).concat([c.el]).forEach(function (x) { delete state.edits[x.getAttribute('data-ed')]; });
-      } else state.ops.push({ t: 'rm', id: c.id });             // baked into this working copy: record a removal
-      c.el.remove();
-    }
-    else if (c.kind === 'Removed' && c.pristine) {
-      state.ops = state.ops.filter(function (o) { return !(o.t === 'rm' && o.id === c.id); });
-      var el = c.pristine.cloneNode(true);
-      if (placeLike(c.pristine, el)) { var cm = placeholderComment(c.pristine); if (cm) el.parentNode.insertBefore(cm.cloneNode(), el); enableLeaves(el); phActions(true, el); }
-    }
-    else if (c.kind === 'Removed' && c.baked) {
-      var t = document.createElement('template'); t.innerHTML = c.baked.outer; var n = t.content.firstElementChild;
-      var ref = byId(document, c.baked.ref); if (!ref) { toast('Cannot find where this block was; add it by hand instead.'); return; }
-      ref.insertAdjacentElement(c.baked.pos === 'before' ? 'beforebegin' : 'afterend', n);
-      state.ops.push({ t: 'add', id: c.id, ref: c.baked.ref, pos: c.baked.pos, tag: n.tagName.toLowerCase(), cls: n.className, html: n.innerHTML, leaf: n.hasAttribute('data-ed-leaf') });
-      orig[c.id] = n.innerHTML; enableLeaves(n); phActions(true, n);
-    }
-    else if (c.kind === 'Marked final') { if (c.baked) state.ops.push({ t: 'reph', id: c.id }); else state.ops = state.ops.filter(function (o) { return !(o.t === 'unph' && o.id === c.id); }); c.el.classList.add('ph-inline'); var lf = c.el.closest(LEAF); if (lf && lf !== c.el) recordEdit(lf); }
-    save(); refreshMarks(); renderChanges();
+    if (c.kind === 'Edited') { c.el.innerHTML = pristineHTML(c.id); clearTimeout(timers[c.id]); writeEdit(c.id, c.el.innerHTML); }
+    else if (c.kind === 'Added' || c.kind === 'Added image') { dropComment(c.el); c.el.remove(); writeOp({ t: 'rm', id: c.id }); }
+    else if (c.kind === 'Removed') { var op = { t: 'restore', id: c.id }; applyOp(document, op); writeOp(op); }
+    else if (c.kind === 'Marked final') { c.el.classList.add('ph-inline'); writeOp({ t: 'reph', id: c.id }); }
+    refreshMarks(); renderChanges();
   }
   function renderChanges() {
     var panel = $('#ed-panel'); if (panel.hidden) return;
     var list = changes();
     if (!list.length) { panel.innerHTML = '<div class="ed-empty">No changes yet. Click any paragraph to start.</div>'; return; }
-    panel.innerHTML = list.map(function (c, i) {
-      var t = c.kind === 'Edited' ? '<s>' + esc(snip(c.before)) + '</s><span class="ar">→</span>' + esc(snip(c.after))
-        : c.kind === 'Removed' ? '<s>' + esc(snip(c.before)) + '</s>'
-        : c.kind === 'Added image' ? 'Figure inserted' : esc(snip(c.after));
-      var jump = c.el ? '<button type="button" data-jump="' + i + '">Show</button>' : '';
-      return '<div class="ed-chg"><div class="k"><b>' + esc(c.kind) + '</b> · ' + esc(c.sec) + '</div><div class="t">' + t + '</div><div class="a">' + jump + '<button type="button" data-revert="' + i + '">Revert</button></div></div>';
-    }).join('');
-    panel.querySelectorAll('[data-jump]').forEach(function (b) { b.onclick = function () { var c = list[+b.getAttribute('data-jump')]; var d = c.el.closest('details'); if (d) d.open = true; c.el.scrollIntoView({ block: 'center' }); c.el.classList.remove('ed-flash'); void c.el.offsetWidth; c.el.classList.add('ed-flash'); }; });
-    panel.querySelectorAll('[data-revert]').forEach(function (b) { b.onclick = function () { revert(list[+b.getAttribute('data-revert')]); }; });
+    names(list.map(function (c) { return c.by; }), function (ps) {
+      panel.innerHTML = list.map(function (c, i) {
+        var t = c.kind === 'Edited' ? '<s>' + esc(snip(c.before)) + '</s><span class="ar">→</span>' + esc(snip(c.after))
+          : c.kind === 'Removed' ? '<s>' + esc(snip(c.before)) + '</s>'
+          : c.kind === 'Added image' ? 'Figure inserted' : esc(snip(c.after));
+        var av = avatarOf(c.by, ps), who = (c.by || c.at) ? '<span class="ed-who">· ' + (av ? '<img src="' + esc(av) + '" alt="">' : '') + esc(nameOf(c.by, ps)) + (c.at ? ', ' + esc(ago(c.at)) : '') + '</span>' : '';
+        var jump = c.el ? '<button type="button" data-jump="' + i + '">Show</button>' : '';
+        var rev = readOnly ? '' : '<button type="button" data-revert="' + i + '">Revert</button>';
+        return '<div class="ed-chg"><div class="k"><b>' + esc(c.kind) + '</b> · ' + esc(c.sec) + ' ' + who + '</div><div class="t">' + t + '</div><div class="a">' + jump + rev + '</div></div>';
+      }).join('');
+      panel.querySelectorAll('[data-jump]').forEach(function (b) { b.onclick = function () { var c = list[+b.getAttribute('data-jump')]; var d = c.el.closest('details'); if (d) d.open = true; c.el.scrollIntoView({ block: 'center' }); c.el.classList.remove('ed-flash'); void c.el.offsetWidth; c.el.classList.add('ed-flash'); }; });
+      panel.querySelectorAll('[data-revert]').forEach(function (b) { b.onclick = function () { revert(list[+b.getAttribute('data-revert')]); }; });
+    });
   }
 
   // ---------- edit mode
-  function enableLeaves(root) { $$(LEAF, root).concat(root && root.matches && root.matches(LEAF) ? [root] : []).forEach(function (el) { if (on) { el.setAttribute('contenteditable', 'true'); el.setAttribute('spellcheck', 'true'); } else { el.removeAttribute('contenteditable'); el.removeAttribute('spellcheck'); } }); }
+  function enableLeaves(root) { var list = $$(LEAF, root); if (root && root.matches && root.matches(LEAF)) list.push(root); list.forEach(function (el) { if (on) { el.setAttribute('contenteditable', 'true'); el.setAttribute('spellcheck', 'true'); } else { el.removeAttribute('contenteditable'); el.removeAttribute('spellcheck'); } }); }
   function phActions(show, root) {
     $$('.ph[data-ed]', root).forEach(function (ph) {
       var row = ph.querySelector(':scope > .ed-ph');
       if (!show) { if (row) row.remove(); return; }
       if (row) return;
       row = document.createElement('div'); row.className = 'ed-ph'; row.setAttribute('data-editor', '');
-      row.innerHTML = '<button type="button" data-act="text">Replace with text</button><button type="button" data-act="img">Add image…</button><button type="button" data-act="del">Delete box</button>';
+      row.innerHTML = '<button type="button" data-act="text">Replace with text</button>' + (caps.assets ? '<button type="button" data-act="img">Add image…</button>' : '') + '<button type="button" data-act="del">Delete box</button>';
       ph.appendChild(row);
     });
     $$('.ph-inline[data-ed]', root).forEach(function (el) {
@@ -1495,86 +1839,64 @@ body.ed-on [data-ed-leaf] a{pointer-events:none}
   function setMode(v) {
     on = v; document.body.classList.toggle('ed-on', on);
     enableLeaves(document); phActions(on);
-    $('#ed-tools').hidden = !on; $('#ed-open').hidden = on;
-    if (!on) { $('#ed-panel').hidden = true; $('#ed-helpbox').hidden = true; $('#ed-changes').setAttribute('aria-expanded', 'false'); $('#ed-help').setAttribute('aria-expanded', 'false'); }
-    refreshMarks();
+    $('#ed-tools').hidden = !on; $('#ed-open').hidden = on || readOnly;
+    if (!on) { $('#ed-panel').hidden = true; $('#ed-helpbox').hidden = true; $('#ed-changes').setAttribute('aria-expanded', 'false'); $('#ed-help').setAttribute('aria-expanded', 'false'); setPresence(null); }
+    refreshMarks(); renderPeers();
   }
+  function setReadOnly(msg) { readOnly = true; if (on) setMode(false); $('#ed-open').hidden = true; var v = document.createElement('span'); v.className = 'ed-view'; v.textContent = 'View only'; $('#ed-bar').appendChild(v); if (msg) toast(msg, 10000); }
   function focusAt(el, atEnd) { el.focus(); var r = document.createRange(); r.selectNodeContents(el); r.collapse(!atEnd); var s = window.getSelection(); s.removeAllRanges(); s.addRange(r); }
   function prevLeaf(el) { var all = $$(LEAF).filter(function (x) { return !x.closest('[data-editor]'); }); var i = all.indexOf(el); return i > 0 ? all[i - 1] : null; }
   function addBlock(tag, cls, ref, pos, html, leaf) {
-    var n = document.createElement(tag); if (cls) n.className = cls;
-    var id = newId(); n.setAttribute('data-ed', id); if (leaf) n.setAttribute('data-ed-leaf', '1'); n.innerHTML = html || '';
-    ref.insertAdjacentElement(pos === 'before' ? 'beforebegin' : 'afterend', n);
-    state.ops.push({ t: 'add', id: id, ref: ref.getAttribute('data-ed'), pos: pos, tag: tag, cls: cls || '', html: html || '', leaf: !!leaf });
-    enableLeaves(n); return n;
+    var op = { t: 'add', id: newId(), ref: ref.getAttribute('data-ed'), pos: pos, tag: tag, cls: cls || '', html: html || '', leaf: !!leaf };
+    applyOp(document, op); writeOp(op); return byId(document, op.id);
   }
   function removeBlock(el) {
     var id = el.getAttribute('data-ed');
-    if (pristineHTML(id) === null) { state.ops = state.ops.filter(function (o) { return !(o.t === 'add' && o.id === id); }); }
-    else state.ops.push({ t: 'rm', id: id });
-    $$('[data-ed]', el).concat([el]).forEach(function (x) { delete state.edits[x.getAttribute('data-ed')]; });
-    dropComment(el); el.remove(); save(); refreshMarks(); renderChanges();
+    $$('[data-ed]', el).concat([el]).forEach(function (x) { clearTimeout(timers[x.getAttribute('data-ed')]); });
+    dropComment(el); el.remove(); writeOp({ t: 'rm', id: id }); refreshMarks(); renderChanges();
   }
   function splitBlock(leaf) {
     var sel = window.getSelection(); if (!sel.rangeCount) return;
     var r = sel.getRangeAt(0); r.deleteContents();
     var after = document.createRange(); after.setStart(r.endContainer, r.endOffset); after.setEnd(leaf, leaf.childNodes.length);
     var frag = after.extractContents();
-    var cls = (leaf.className || '').trim();
-    var n = addBlock(leaf.tagName.toLowerCase(), cls, leaf, 'after', '', true);
+    var n = addBlock(leaf.tagName.toLowerCase(), (leaf.className || '').trim(), leaf, 'after', '', true);
     n.appendChild(frag);
     var br = leaf.lastChild; if (br && br.nodeName === 'BR') br.remove();
-    recordEdit(leaf); recordEdit(n); focusAt(n, false); renderChanges();
+    recordEdit(leaf); flushEdit(leaf); if (n.textContent.trim()) { recordEdit(n); flushEdit(n); }
+    focusedId = n.getAttribute('data-ed'); focusAt(n, false); renderChanges();
   }
 
-  // ---------- exports
-  function refFor(p, root) {   // nearest neighbour of pristine element p that exists in root
-    var s;
-    for (s = p.previousElementSibling; s; s = s.previousElementSibling) if (s.hasAttribute('data-ed') && byId(root, s.getAttribute('data-ed'))) return { ref: s.getAttribute('data-ed'), pos: 'after' };
-    for (s = p.nextElementSibling; s; s = s.nextElementSibling) if (s.hasAttribute('data-ed') && byId(root, s.getAttribute('data-ed'))) return { ref: s.getAttribute('data-ed'), pos: 'before' };
-    return null;
-  }
-  function buildDoc(final) {
+  // ---------- export
+  function buildFinal(cb) {
     var root = ED.pristine.cloneNode(true);
-    $$('#ed-orig', root).forEach(function (x) { x.remove(); });
-    apply(root, state.ops, state.edits);
-    var body = root.querySelector('body');
-    if (final) {
-      $$('[data-editor]', root).forEach(function (x) { x.remove(); });
-      $$('p[data-ed],li[data-ed]', root).forEach(function (x) { if (pristineHTML(x.getAttribute('data-ed')) === null && !x.textContent.trim() && !x.querySelector('img')) x.remove(); });
-      $$('[data-ed],[data-ed-leaf],[contenteditable],[data-ed-changed],[spellcheck]', root).forEach(function (x) { ['data-ed', 'data-ed-leaf', 'contenteditable', 'spellcheck', 'data-ed-changed'].forEach(function (a) { x.removeAttribute(a); }); });
-      body.removeAttribute('data-ed-build'); body.classList.remove('ed-on'); if (!body.className) body.removeAttribute('class');
-    } else {
-      body.setAttribute('data-ed-build', stamp());
-      var j = { orig: {}, added: [], removed: [], final: [] };
-      changes().forEach(function (c) {
-        if (c.kind === 'Edited') j.orig[c.id] = origHTML(c.id);
-        else if (c.kind === 'Added' || c.kind === 'Added image') j.added.push(c.id);
-        else if (c.kind === 'Removed' && c.pristine) { var rf = refFor(c.pristine, root); if (rf) j.removed.push({ id: c.id, outer: c.pristine.outerHTML, html: c.pristine.innerHTML, ref: rf.ref, pos: rf.pos, sec: c.sec }); }
-        else if (c.kind === 'Removed' && c.baked) j.removed.push(c.baked);
-        else if (c.kind === 'Marked final') j.final.push(c.id);
-      });
-      var s = document.createElement('script'); s.type = 'application/json'; s.id = 'ed-orig'; s.setAttribute('data-editor', '');
-      s.textContent = JSON.stringify(j).replace(/<\//g, '<\\/');
-      var tb = document.createElement('template'); tb.innerHTML = TOOLBAR_HTML;
-      body.appendChild(tb.content.firstElementChild); body.appendChild(s); body.appendChild($('#ed-main').cloneNode(true));
+    applyAll(root);
+    $$('[data-editor]', root).forEach(function (x) { x.remove(); });
+    $$('p[data-ed],li[data-ed]', root).forEach(function (x) { if (isAdded(x.getAttribute('data-ed')) && !x.textContent.trim() && !x.querySelector('img')) x.remove(); });
+    $$('[data-ed],[data-ed-leaf],[contenteditable],[data-ed-changed],[spellcheck],[data-ed-peer]', root).forEach(function (x) { ['data-ed', 'data-ed-leaf', 'contenteditable', 'spellcheck', 'data-ed-changed', 'data-ed-peer', 'style'].forEach(function (a) { if (a !== 'style' || x.hasAttribute('data-ed-peer')) x.removeAttribute(a); }); });
+    var body = root.querySelector('body'); body.classList.remove('ed-on'); if (!body.className) body.removeAttribute('class');
+    var placeholders = root.querySelectorAll('.ph,.ph-inline').length;
+    // uploaded images: inline them so the file stays self-contained
+    var imgs = $$('img[src^="/_blob/"]', root), left = imgs.length;
+    function finish() {
+      var headEl = $('#ed-head'), head = headEl ? headEl.textContent : '<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">';
+      var attrs = headEl && headEl.getAttribute('data-html-attrs') || ' lang="en"';
+      var inner = Array.prototype.map.call(body.childNodes, function (n) { return n.nodeType === 1 && (n.tagName === 'TITLE' || n.hasAttribute('data-fromhead')) ? '' : (n.outerHTML !== undefined ? n.outerHTML : n.nodeValue); }).join('');
+      cb({ html: '<!DOCTYPE html>\n<html' + attrs + '>\n<head>' + head + '</head>\n<body>' + inner + '</body>\n</html>\n', placeholders: placeholders });
     }
-    return { html: '<!DOCTYPE html>\n' + root.outerHTML, placeholders: root.querySelectorAll('.ph,.ph-inline').length };
-  }
-  function download(name, text) {
-    var b = new Blob([text], { type: 'text/html' }), u = URL.createObjectURL(b), a = document.createElement('a');
-    a.href = u; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(u); }, 10000);
+    if (!left) return finish();
+    imgs.forEach(function (im) {
+      fetch(im.getAttribute('src')).then(function (r) { return r.blob(); }).then(function (b) { var rd = new FileReader(); rd.onload = function () { im.setAttribute('src', rd.result); if (!--left) finish(); }; rd.onerror = function () { if (!--left) finish(); }; rd.readAsDataURL(b); }).catch(function () { if (!--left) finish(); });
+    });
   }
   function exportFinal() {
-    var d = buildDoc(true), n = changes().length;
-    if (/data-editor|contenteditable/.test(d.html.replace(/<script id="ed-main"[\s\S]*$/, ''))) { toast('Export check failed: editor markup would remain. Please report this.'); return; }
-    download('writeup.html', d.html);
-    toast('Exported writeup.html (' + (d.html.length / 1e6).toFixed(1) + ' MB) with ' + n + (n === 1 ? ' change' : ' changes') + '. ' + (d.placeholders ? d.placeholders + ' placeholder' + (d.placeholders === 1 ? '' : 's') + ' still open.' : 'No placeholders left.'), 9000);
-  }
-  function saveCopy() {
-    var d = buildDoc(false);
-    download('writeup.editable.html', d.html);
-    toast('Saved writeup.editable.html with ' + changes().length + ' change(s) baked in. Open that file to continue, or send it to Claude. This tab keeps its own draft.', 9000);
+    if (!caps.downloads) { toast('Downloads are not available in this view. Ask Claude to export the draft.'); return; }
+    buildFinal(function (d) {
+      var n = changes().length;
+      caps.downloads.save({ filename: 'writeup.html', data: new Blob([d.html], { type: 'text/html' }) }).then(function () {
+        toast('Exported writeup.html (' + (d.html.length / 1e6).toFixed(1) + ' MB) with ' + n + (n === 1 ? ' change' : ' changes') + '. ' + (d.placeholders ? d.placeholders + ' placeholder' + (d.placeholders === 1 ? '' : 's') + ' still open.' : 'No placeholders left.'), 9000);
+      }, function (e) { if (e.code === 'declined') return; toast(e.code === 'extension_not_enabled' ? 'HTML downloads are switched off in this view. Ask Claude to export the draft.' : 'Export failed (' + e.code + ').'); });
+    });
   }
 
   // ---------- events
@@ -1582,8 +1904,10 @@ body.ed-on [data-ed-leaf] a{pointer-events:none}
     if (!on || !e.target.closest) return;
     if (e.target.closest('[data-editor]')) return;
     var leaf = e.target.closest(LEAF);
-    if (leaf) { e.stopPropagation(); if (e.target.closest('a')) e.preventDefault(); }   // page widgets stay put while editing text
+    if (leaf) { e.stopPropagation(); if (e.target.closest('a')) e.preventDefault(); }
   }, true);
+  document.addEventListener('focusin', function (e) { var leaf = e.target.closest && e.target.closest(LEAF); if (leaf && on && !leaf.closest('[data-editor]')) { focusedId = leaf.getAttribute('data-ed'); lastLeaf = leaf; setPresence(focusedId); $('#ed-comment').disabled = false; } });
+  document.addEventListener('focusout', function (e) { var leaf = e.target.closest && e.target.closest(LEAF); if (leaf && on) { flushEdit(leaf); if (focusedId === leaf.getAttribute('data-ed')) focusedId = null; setPresence(null); } });
   document.addEventListener('input', function (e) { var leaf = e.target.closest && e.target.closest(LEAF); if (leaf && on) recordEdit(leaf); });
   document.addEventListener('paste', function (e) {
     var leaf = e.target.closest && e.target.closest(LEAF); if (!leaf || !on) return;
@@ -1593,23 +1917,21 @@ body.ed-on [data-ed-leaf] a{pointer-events:none}
   });
   document.addEventListener('keydown', function (e) {
     if (!on) return;
-    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); saveCopy(); return; }
     var leaf = e.target.closest && e.target.closest(LEAF); if (!leaf) return;
     var tag = leaf.tagName.toLowerCase();
     if (e.key === 'Escape') { leaf.blur(); return; }
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (tag === 'p' || tag === 'li') splitBlock(leaf); return; }
     if ((e.key === 'Backspace' || e.key === 'Delete') && (tag === 'p' || tag === 'li') && !leaf.textContent.trim() && !leaf.querySelector('img')) {
-      e.preventDefault(); var p = prevLeaf(leaf); removeBlock(leaf); if (p) focusAt(p, true);
+      e.preventDefault(); var p = prevLeaf(leaf); focusedId = null; removeBlock(leaf); if (p) focusAt(p, true);
     }
   }, true);
   document.addEventListener('click', function (e) {
     var b = e.target.closest && e.target.closest('.ed-ph button, .ed-pi'); if (!b) return;
     if (b.classList.contains('ed-pi')) {
       var sp = b.previousElementSibling; b.remove();
-      state.ops.push({ t: 'unph', id: sp.getAttribute('data-ed') }); dropComment(sp);
-      sp.classList.remove('ph-inline'); if (!sp.className) sp.removeAttribute('class');
-      var lf = sp.closest(LEAF); if (lf && lf !== sp) recordEdit(lf);
-      save(); refreshMarks(); renderChanges(); return;
+      var op = { t: 'unph', id: sp.getAttribute('data-ed') }; applyOp(document, op); writeOp(op);
+      var lf = sp.closest(LEAF); if (lf && lf !== sp) { recordEdit(lf); flushEdit(lf); }
+      refreshMarks(); renderChanges(); return;
     }
     var ph = b.closest('.ph'), act = b.getAttribute('data-act');
     if (act === 'text') { var p = addBlock('p', '', ph, 'before', '', true); removeBlock(ph); focusAt(p, false); }
@@ -1617,33 +1939,40 @@ body.ed-on [data-ed-leaf] a{pointer-events:none}
     else if (act === 'img') { var f = $('#ed-file'); f.__ph = ph; f.value = ''; f.click(); }
   });
   $('#ed-file').addEventListener('change', function () {
-    var f = this.files[0], ph = this.__ph; if (!f || !ph) return;
-    if (f.size > 1.5e6 && !window.confirm('This image is ' + (f.size / 1e6).toFixed(1) + ' MB. The article embeds images in the file; a JPEG under 1 MB keeps it light. Insert anyway?')) return;
-    var rd = new FileReader();
-    rd.onload = function () {
+    var f = this.files[0], ph = this.__ph; if (!f || !ph || !caps.assets) return;
+    toast('Uploading image…', 20000);
+    caps.assets.upload(f).then(function (res) {
       var cid = newId();
-      var html = '<div class="fig"><img class="shot" src="' + rd.result + '" alt="" tabindex="0" role="button"><span class="enl" aria-hidden="true">⤢ Enlarge</span></div><figcaption data-ed="' + cid + '" data-ed-leaf="1"><b>Caption.</b> Describe the image here.</figcaption>';
+      var html = '<div class="fig"><img class="shot" src="' + esc(res.url) + '" alt="" tabindex="0" role="button"><span class="enl" aria-hidden="true">⤢ Enlarge</span></div><figcaption data-ed="' + cid + '" data-ed-leaf="1"><b>Caption.</b> Describe the image here.</figcaption>';
       var fig = addBlock('figure', '', ph, 'before', html, false);
-      save(); refreshMarks(); renderChanges(); focusAt(fig.querySelector('figcaption'), true);
+      refreshMarks(); renderChanges(); focusAt(fig.querySelector('figcaption'), true);
       toast('Image inserted above the placeholder box. Edit the caption, then delete the box when you are done.');
-    };
-    rd.readAsDataURL(f);
+    }, function (e) { toast(e.code === 'too_large' ? 'That image is over the 20 MB limit.' : e.code === 'unsupported_type' ? 'Use a PNG, JPEG, GIF or WebP image.' : 'Upload failed (' + e.code + ').'); });
   });
   $('#ed-open').onclick = function () { setMode(true); };
   $('#ed-done').onclick = function () { setMode(false); };
   $('#ed-changes').onclick = function () { var p = $('#ed-panel'); p.hidden = !p.hidden; $('#ed-helpbox').hidden = true; $('#ed-help').setAttribute('aria-expanded', 'false'); this.setAttribute('aria-expanded', String(!p.hidden)); renderChanges(); };
   $('#ed-help').onclick = function () { var p = $('#ed-helpbox'); p.hidden = !p.hidden; $('#ed-panel').hidden = true; $('#ed-changes').setAttribute('aria-expanded', 'false'); this.setAttribute('aria-expanded', String(!p.hidden)); };
-  $('#ed-discard').onclick = function () { if (!changes().length) { toast('Nothing to discard.'); return; } if (window.confirm('Discard every unsaved edit in this browser and reload the draft?')) { discarded = true; clearTimeout(saveTimer); try { localStorage.removeItem(KEY); } catch (e) { } location.reload(); } };
-  $('#ed-save').onclick = saveCopy;
   $('#ed-export').onclick = exportFinal;
+  $('#ed-comment').onclick = function () {
+    if (!caps.comments || !lastLeaf || !lastLeaf.isConnected) { toast('Click a paragraph first, then Comment.'); return; }
+    caps.comments.openComposer({ element: lastLeaf }).then(function (r) { if (!r.opened) toast('Finish or close the open comment first.'); }, function (e) { if (e.code === 'unavailable') { $('#ed-comment').hidden = true; toast('Commenting is not available in this view.'); } });
+  };
+  window.addEventListener('pagehide', function () { Object.keys(timers).forEach(function (id) { var el = byId(document, id); if (el) flushEdit(el); }); });
 
-  window.addEventListener('pagehide', function () { clearTimeout(saveTimer); save(); });
-
-  // ---------- boot
-  load();
-  apply(document, state.ops, state.edits);
-  updateCount();
+  // ---------- boot: render first, light up when the capabilities answer
+  setSync('connecting…', true);
+  var use = function (n) { return (window.claude && window.claude.use) ? window.claude.use(n).catch(function () { return null; }) : Promise.resolve(null); };
+  Promise.all([use('db'), use('user'), use('room'), use('comments'), use('downloads'), use('assets')]).then(function (r) {
+    caps = { db: r[0], user: r[1], room: r[2], comments: r[3], downloads: r[4], assets: r[5] };
+    if (!caps.db) { setSync('not connected'); setReadOnly(window.claude ? 'Sign in to claude.ai to edit this draft.' : null); return; }
+    var after = function () {
+      $('#ed-comment').hidden = !caps.comments; $('#ed-export').hidden = !caps.downloads;
+      if (canWrite === false) setReadOnly('You can read this draft but not change it. Ask the owner for Contributor access.');
+      subscribe();
+      if (caps.room) { caps.room.onPeers(renderPeers, function () { }); }
+    };
+    if (caps.user) Promise.all([caps.user.id(), caps.user.can('data.write')]).then(function (u) { me = u[0]; canWrite = u[1]; after(); }, after); else after();
+  });
 })();
 </script>
-</body>
-</html>

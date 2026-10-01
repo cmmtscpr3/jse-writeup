@@ -23,6 +23,7 @@ against the sources, what reviewers found, and what is still open.
 | `tools/check_render.js` | Playwright check: no script errors, no non-file/data requests, no horizontal scroll at 1280/820/390 px, no heading-order jumps, lightbox keyboard flow, sticky table header. Optional screenshot dump. | `node tools/check_render.js writeup.html [outdir]` before every commit. |
 | `tools/capture_dashboard.js` | Re-captures the screenshots (`shots`) or the per-cycle seat history (`history`) from the reference pages. | `node tools/capture_dashboard.js shots` / `history`, then `python3 tools/embed_assets.py --hist`. |
 | `writeup.editable.html` | **Generated**: `writeup.html` plus an in-page text editor (see section 10). Never edit by hand. | `python3 tools/make_editable.py` after every change to `writeup.html`. |
+| `writeup.shared.html` | **Generated**: the article prepared for publishing as a claude.ai page with a shared multi-editor (section 11). Not standalone: no html/head/body wrapper, needs `window.claude`. Published at https://claude.ai/artifact/KcKj2GkKtg4BvTiW33Xygm | `python3 tools/make_shared.py`, then republish with the Artifact tool (same file path keeps the URL). |
 | `tools/make_editable.py`, `tools/editor/`, `tools/test_editor.js` | The build script, the editor's source (`pre.js`, `editor.js`, `editor.css`, `toolbar.html`) inlined into the editable copy, and its end-to-end test. | Edit the editor here, rebuild, run `node tools/test_editor.js` (section 10). |
 
 Parsing tip for the two big HTML files: find the offset of `const DATA = ` / `const SNAPSHOT = ` and
@@ -159,4 +160,43 @@ the editor; `node tools/check_render.js writeup.editable.html` must also pass. K
 structural edits (new tables, reordering, new figures outside placeholders), framework item buttons are
 not editable, and a draft with embedded images can exceed the browser's localStorage quota (the editor
 warns and the user should Save working copy).
+
+## 11. The shared copy on claude.ai (writeup.shared.html)
+
+A draft of option 2 from the collaboration discussion: two or more people editing the same draft in
+place on a claude.ai page. Built by `tools/make_shared.py` from `writeup.html` + `tools/editor/pre.js`,
+`editor.css`, `shared.css`, `toolbar_shared.html`, `shared.js`. Published once at
+https://claude.ai/artifact/KcKj2GkKtg4BvTiW33Xygm with capabilities
+`{db:{}, user:{scopes:["profile"]}, room:{}, comments:{composer_only:true}, downloads:true, assets:{}}`
+(the `assets` declaration makes it organization-internal: no public link). Republish by publishing the
+same file path from this session, or `url` from another.
+
+Model (same block ids as the local editor, from pre.js):
+- `blocks/<id>` = `{html, by, at}`: one document per edited block, last writer wins; deleting the doc
+  restores the pristine text. Written 700 ms after the last keystroke and on blur.
+- `ops/<autoId>` = `{t, id, ref, pos, tag, cls, html, leaf, by, at}`: append-only log of structural
+  changes, ordered by `at`. Kinds: `add`, `rm`, `restore` (re-insert a pristine block), `unph`
+  (mark an inline placeholder final), `reph` (undo that). Reverts write inverse entries; nothing is
+  ever deleted by the page. Both exports replay the log onto the pristine snapshot.
+- Images: `assets.upload(file)` -> `/_blob/<id>` url in the figure's `add` op; Export final fetches
+  them and inlines data URIs so the downloaded `writeup.html` stays self-contained.
+- The original `<head>` is carried verbatim in `<script type="text/plain" id="ed-head">`; Export
+  final rebuilds the full document from it (the artifact body carries `<title>` + `<style data-fromhead>`,
+  which the export skips). A no-edit export differs from `writeup.html` only in whitespace and `hidden=""`.
+- Live behaviour: both collections are subscribed once (`onSnapshot`); a remote edit to the block you are
+  typing in is not applied (toast instead; your version wins on blur). `room.presence({editing, uid})`
+  puts a name tag (`data-ed-peer`, colour `--peer`) on the block another person is in. `user.can
+  ("data.write") === false` or a rejected write -> "View only" (shared edits still shown). Comment button
+  -> `comments.openComposer({element: lastLeaf})`. Export -> `downloads.save` (html is on the allowlist).
+- Claude can read or reset the draft with the ArtifactData tool (`list` on `ops` / `blocks`; deleting
+  an op makes open pages show a "reset outside this page, reload" notice). To commit the team's edits:
+  export from the page, or replay the two collections onto `writeup.html` with the same logic.
+
+Testing: `node tools/test_shared.js` runs the page under a mock `window.claude` (in-memory db with
+snapshot callbacks, user, room, downloads, assets, comments; mock store persisted in localStorage so
+reload is covered) inside the Artifact skeleton. It must print ALL OK. It cannot exercise the real
+runtime; after a publish do one `ArtifactData list` of `ops` and `blocks`. Known limits: block-level
+last-writer-wins (no character merging), no structural edits outside placeholders, the `ops`
+collection grows without bound (fine for one article; prune via ArtifactData if it ever matters),
+and the second editor must be given Contributor or Editor access from the page's Share menu.
 
