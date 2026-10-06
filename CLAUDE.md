@@ -35,7 +35,7 @@ All of these were checked against the sources by review agents; keep them consis
 
 - Timeline: commissioned about two months before polling day; cycles 8 Jun–11 Jul 2026 (34 days, 74 cycles, up to 7 in a day while the pipeline was being built); nomination day 1 Jul, when the engine switched to a contest-aware version using each seat's real line-up. 25 dashboard versions shipped during the run.
 - Three interfaces: **Monitoring** (AI extracts), **Predicting** (AI judges), **Updating: the Daily Toast** (AI summarises; ~400 words, every morning and, from 1 Jul, most evenings; 47 briefings, 28 mornings, 16 evenings, three other).
-- Six monitoring indicators: voter preference by race (polls), voter sentiment from news comments (Malay/Chinese/English), campaign activity, key leader presence in Johor, royal signals, foreign (Singapore) mentions. Leader presence and Singapore mentions never appeared on the graded rubric list. Singapore mentions are display-only.
+- Six monitoring indicators: voter preference by race (polls), voter sentiment from news comments (Malay/Chinese/English), campaign activity, key leader presence in Johor, royal signals, foreign (Singapore) mentions. Leader presence and Singapore mentions never appeared on the graded rubric list; on 6 Oct 2026 the author asked (via a comment on the shared page) for leader presence to carry grade C in the "what we used" table, so the table now shows C while the row still says "Not on the graded list". Singapore mentions are display-only.
 - Engine: BN% per seat ≈ B_M×Malay_eff + B_C×Chinese_eff + seat residual; 2022 baseline B_M 60.7%, B_C 12.8%, T_M 66.2%, T_C 45.8%. Six dials: ΔMalay, ΔChinese, turnout target, Malay–Chinese turnout gap, non-BN Malay lean rural / urban (stored as the share to PH; the dashboard and the article show them as shifts from the 2022 split, rural 26% / urban 49%). Plus per-seat overrides (the dashboard's word; "nudge" only as a verb). Backtests: 52/56 correct and exact BN seat total on both 2013→2018 and 2018→2022. After nomination day: PN absent in 23 seats, Bersama in 15, two incumbents switched coalitions (Endau, Layang-Layang).
 - Manual override sidebar (Prediction view, collapsed behind a blue "Click to manually override AI assessment" handle): every engine parameter as a slider with an "AI" badge on agent-set values; two pinned buttons ("Reset to AI assessed parameters", "Set to 2022 baselines"); after nomination day three contest settings the agents never set (PH→Bersama split 15%, absent-PN→BN share 60%, incumbency toggle on; the payloads carry only the six dials + seat_overrides); a seat-override form and list.
 - AI layer: five "analysts" (voter-preference, voter-response, campaign, leader-interest, royal-signals) plus a rules-based editor (the dashboard calls it the Synthesising Agent). Rule: "code computes; the AI only classifies and judges direction". Signals are direction + size band + confidence band, never numbers; calibration uses fixed published weights (the weight matrix in the article matches the dashboard's methodology modal verbatim).
@@ -169,7 +169,11 @@ place on a claude.ai page. Built by `tools/make_shared.py` from `writeup.html` +
 https://claude.ai/artifact/KcKj2GkKtg4BvTiW33Xygm with capabilities
 `{db:{}, user:{scopes:["profile"]}, room:{}, comments:{composer_only:true}, downloads:true, assets:{}}`
 (the `assets` declaration makes it organization-internal: no public link). Republish by publishing the
-same file path from this session, or `url` from another.
+same file path from this session, or `url` from another. The team is actively editing there (38 block
+edits by two people as of 6 Oct 2026), so before changing `writeup.html` check that block ids stay
+stable: assign ids with pre.js on the old and new file and compare (a text or class change inside an
+existing element is safe; adding or removing a text-bearing element before other blocks shifts ids).
+Comments on the page sent to Claude arrive in this session; answer in the thread with ArtifactComments.
 
 Model (same block ids as the local editor, from pre.js):
 - `blocks/<id>` = `{html, by, at}`: one document per edited block, last writer wins; deleting the doc
