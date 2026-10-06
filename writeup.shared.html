@@ -699,8 +699,8 @@ footer .in{padding-top:18px;border-top:1px solid var(--rule);font-family:var(--s
       <li><a href="#s5">Build: what we fed it</a></li>
       <li><a href="#s6">Build: watching</a></li>
       <li><a href="#s7">Build: predicting</a></li>
-      <li><a href="#s8">Build: the Daily Toast</a></li>
       <li><a href="#s9">What the final product looked like</a></li>
+      <li><a href="#s8">Build: the Daily Toast</a></li>
       <li><a href="#s10">Results</a></li>
       <li><a href="#s11">Next steps</a></li>
     </ol>
@@ -778,7 +778,7 @@ footer .in{padding-top:18px;border-top:1px solid var(--rule);font-family:var(--s
 <section class="wrap" id="s3">
   <h2 data-ed="b57"><span class="num">03 · Design</span>The question, the yardstick, and the hypotheses</h2>
 
-  <p data-ed="b58">We adopted a two-part approach. First, design the toaster: work out the problem, the hypotheses, and the indicators that would tell us whether the hypotheses were holding. Only then build the machine: find the data and build the components that track those indicators. This section is the design; sections 04 to 08 are the build.</p>
+  <p data-ed="b58">We adopted a two-part approach. First, design the toaster: work out the problem, the hypotheses, and the indicators that would tell us whether the hypotheses were holding. Only then build the machine: find the data and build the components that track those indicators. This section is the design; sections 04 to 09 are the build.</p>
 
   <div class="proc">
     <div class="lane">
@@ -892,7 +892,7 @@ footer .in{padding-top:18px;border-top:1px solid var(--rule);font-family:var(--s
 <section class="wrap" id="s4">
   <h2 data-ed="b100"><span class="num">04 · Build · the three interfaces</span>Three interfaces for covering an election</h2>
 
-  <p data-ed="b101">Thinking about who would use the machine, and for what, gave us three interfaces. Each asks the AI to do something different: read, judge, or write. Monitoring is where AI extracts information. Predicting is where it makes assessments. Updating, which became the Daily Toast, is where it summarises. Keeping the three jobs separate let us decide how much to trust the AI in each. Section 09 shows the finished dashboard; sections 06 to 08 explain how each interface was built.</p>
+  <p data-ed="b101">Thinking about who would use the machine, and for what, gave us three interfaces. Each asks the AI to do something different: read, judge, or write. Monitoring is where AI extracts information. Predicting is where it makes assessments. Updating, which became the Daily Toast, is where it summarises. Keeping the three jobs separate let us decide how much to trust the AI in each. Section 08 shows the finished dashboard; sections 06, 07 and 09 explain how each interface was built.</p>
 
   <div class="ifaces">
     <div class="iface">
@@ -1241,37 +1241,8 @@ footer .in{padding-top:18px;border-top:1px solid var(--rule);font-family:var(--s
 </section>
 
 <!-- ============================================================ 8 -->
-<section class="wrap" id="s8">
-  <h2 data-ed="b399"><span class="num">08 · Build · briefing</span>Updating: the Daily Toast</h2>
-
-  <p data-ed="b400">The third interface is the easiest to explain. After the morning update, and from 1 July the evening one too, a model wrote a short situation report and pushed it to the principals on Telegram. It was given two things: a digest of how the forecast had moved since the last update, with every number marked authoritative and never to be recomputed, and the new ground evidence the agents had read. Its instructions were to synthesise rather than enumerate, lead with the bottom line, and make the causal link explicit: the new evidence is why the forecast moved.</p>
-
-  <p data-ed="b401">Here is a real one, from the evening of 7 July, the day the forecast dropped five seats in a single cycle. It was written for people already following the race, so it is dense with names (Najib Razak is the jailed former prime minister whose pardon became a campaign issue; the others are ministers and party elders); if you read one paragraph, read "What moved today". The mood scores it quotes run from −1 to +1, and its "error band (5%)" is the engine's typical seat-level miss.</p>
-
-  <div class="phone">
-    <div class="bubble">
-      <div class="from" data-ed="b402">🍞 Daily Toast · 7 July, evening</div>
-      <h3 data-ed="b403">1. State of play</h3>
-      <p data-ed="b404">The model projected BN winning 38 of 56 seats — but 3 of those are inside the error band (5%), and a further 7 are won by under 10%. That still puts BN clearly above the 29-seat majority line, but the race is less locked than the headline seat count suggests because the opposition now has 11 narrow holds within 10 points of BN's reach, up from 6 this morning. Serom and Kota Iskandar are the tightest projected BN wins, so they should be treated as true toss-ups rather than leans. The broader campaign mood is mixed for BN: Malay comments toward BN warmed from 0.003 to 0.063 over the last five days, and mood toward the Johor government improved more sharply from −0.045 to 0.222. PH's Malay comment mood deteriorated from 0.175 to −0.029, which helps explain why BN still has a majority path despite today's seat losses. The Najib pardon issue is now a central risk because Nazifuddin Najib linked a big BN win in Kluang to support for Najib's release, and Anwar used Serom to frame the election as a vehicle for freeing Najib. BN leaders Hishammuddin Hussein and Azalina Othman Said are trying to separate the election from the pardon process. Opposition fragmentation still helps BN because PN is absent in 29 seats and Bersama is contesting 15, but PH's ground push is now reducing that advantage in several urban and marginal BN seats.</p>
-      <h3 data-ed="b405">2. What moved today</h3>
-      <p data-ed="b406">BN's projection fell from 43 seats this morning to 38 seats tonight, still above the 29-seat majority line but with a materially thinner cushion. The main model driver was Malay support for BN being cut from 3.1 points above its 2022 level to only 0.53 points above 2022, which overwhelmed the unchanged Chinese BN support reading of −1.32 points versus 2022. Turnout did not drive the move because the target stayed at 56 and the Malay–Chinese turnout gap stayed at 20. Rural non-BN Malay alignment moved from 3 points toward PN versus 2022 to 2 points toward PN, which slightly helped PH where both opposition parties are actually on the ballot. The seat evidence was sharper than the statewide parameters: Tangkak, Layang-Layang, Endau, Tenggaroh and Tiram flipped from BN to the opposition column. Serom, Johor Jaya and Kota Iskandar slipped into BN toss-up territory. Rengit and Larkin are now only narrowly ahead for BN.</p>
-      <h3 data-ed="b407">3. Singapore mentions</h3>
-      <p data-ed="b408">Anwar repeatedly drew a boundary around Singapore's role, saying Malaysia should not ask another country to interfere in its elections, even though companies in Singapore could be informed to ease voting arrangements for Malaysian workers. He also said Sunday voting would better suit Malaysians working half-days in Singapore, but stressed the Election Commission is independent. On the JS-SEZ, Anwar rejected claims that Johor alone controls the project, and Tengku Zafrul framed Singapore cooperation as a federal delivery story. Lim Kit Siang used Singapore to discuss overseas Malaysians and return migration.</p>
-      <div class="time" data-ed="b409">Tue 7 Jul 2026 · 18:00 Singapore time · 496 words</div>
-    </div>
-  </div>
-  <p class="note" style="text-align:center;max-width:560px;margin:0 auto 18px" data-ed="b410">Model output from the logs, verbatim apart from typography; the header line was added. The numbers it quotes came from the engine; the model was not allowed to compute any of them. One error rode along into the campaign's last day: the briefing's instructions carried a wrong count, 29 seats without a PN candidate, where the engine's own line-up data (and section 07) say 23. The 29 is a coincidence with the 29-seat majority line. We come back to this in the post-mortem.</p>
-
-  <!-- PLACEHOLDER: Daily Toast screenshots -->
-  <div class="ph small" style="margin-top:18px" data-ed="b411">
-    <span class="lbl">Placeholder · Toast screenshots</span>
-    <p data-ed="b412">Optional: one or two screenshots of the actual Telegram messages, if you would rather show the real thing than the typeset version above.</p>
-  </div>
-</section>
-
-<!-- ============================================================ 9 -->
 <section class="wrap" id="s9">
-  <h2 data-ed="b413"><span class="num">09 · The machine</span>What the final product looked like</h2>
+  <h2 data-ed="b413"><span class="num">08 · The machine</span>What the final product looked like</h2>
 
   <div class="stats">
     <div class="stat"><div class="v" data-ed="b414">34</div><div class="l" data-ed="b415">days of live operation, 8 June to polling day</div></div>
@@ -1328,6 +1299,35 @@ footer .in{padding-top:18px;border-top:1px solid var(--rule);font-family:var(--s
     <div id="tl-table"></div>
   </div>
   <p class="note" data-ed="b430">Seat counts are what the dashboard displayed at the time, including the seat overrides. The two lean dials show how the non-BN Malay vote is assumed to split between PH and PN, as a shift in percentage points from the 2022 split (rural 26% to PH, urban 49%); positive means more PH-leaning. Several cycles can land on one day, which is why the line sometimes flickers. Before 1 July every seat was modelled as a three-way contest; from 1 July the engine used the real candidate list.</p>
+</section>
+
+<!-- ============================================================ 9 -->
+<section class="wrap" id="s8">
+  <h2 data-ed="b399"><span class="num">09 · Build · briefing</span>Updating: the Daily Toast</h2>
+
+  <p data-ed="b400">The third interface is the easiest to explain. After the morning update, and from 1 July the evening one too, a model wrote a short situation report and pushed it to the principals on Telegram. It was given two things: a digest of how the forecast had moved since the last update, with every number marked authoritative and never to be recomputed, and the new ground evidence the agents had read. Its instructions were to synthesise rather than enumerate, lead with the bottom line, and make the causal link explicit: the new evidence is why the forecast moved.</p>
+
+  <p data-ed="b401">Here is a real one, from the evening of 7 July, the day the forecast dropped five seats in a single cycle. It was written for people already following the race, so it is dense with names (Najib Razak is the jailed former prime minister whose pardon became a campaign issue; the others are ministers and party elders); if you read one paragraph, read "What moved today". The mood scores it quotes run from −1 to +1, and its "error band (5%)" is the engine's typical seat-level miss.</p>
+
+  <div class="phone">
+    <div class="bubble">
+      <div class="from" data-ed="b402">🍞 Daily Toast · 7 July, evening</div>
+      <h3 data-ed="b403">1. State of play</h3>
+      <p data-ed="b404">The model projected BN winning 38 of 56 seats — but 3 of those are inside the error band (5%), and a further 7 are won by under 10%. That still puts BN clearly above the 29-seat majority line, but the race is less locked than the headline seat count suggests because the opposition now has 11 narrow holds within 10 points of BN's reach, up from 6 this morning. Serom and Kota Iskandar are the tightest projected BN wins, so they should be treated as true toss-ups rather than leans. The broader campaign mood is mixed for BN: Malay comments toward BN warmed from 0.003 to 0.063 over the last five days, and mood toward the Johor government improved more sharply from −0.045 to 0.222. PH's Malay comment mood deteriorated from 0.175 to −0.029, which helps explain why BN still has a majority path despite today's seat losses. The Najib pardon issue is now a central risk because Nazifuddin Najib linked a big BN win in Kluang to support for Najib's release, and Anwar used Serom to frame the election as a vehicle for freeing Najib. BN leaders Hishammuddin Hussein and Azalina Othman Said are trying to separate the election from the pardon process. Opposition fragmentation still helps BN because PN is absent in 29 seats and Bersama is contesting 15, but PH's ground push is now reducing that advantage in several urban and marginal BN seats.</p>
+      <h3 data-ed="b405">2. What moved today</h3>
+      <p data-ed="b406">BN's projection fell from 43 seats this morning to 38 seats tonight, still above the 29-seat majority line but with a materially thinner cushion. The main model driver was Malay support for BN being cut from 3.1 points above its 2022 level to only 0.53 points above 2022, which overwhelmed the unchanged Chinese BN support reading of −1.32 points versus 2022. Turnout did not drive the move because the target stayed at 56 and the Malay–Chinese turnout gap stayed at 20. Rural non-BN Malay alignment moved from 3 points toward PN versus 2022 to 2 points toward PN, which slightly helped PH where both opposition parties are actually on the ballot. The seat evidence was sharper than the statewide parameters: Tangkak, Layang-Layang, Endau, Tenggaroh and Tiram flipped from BN to the opposition column. Serom, Johor Jaya and Kota Iskandar slipped into BN toss-up territory. Rengit and Larkin are now only narrowly ahead for BN.</p>
+      <h3 data-ed="b407">3. Singapore mentions</h3>
+      <p data-ed="b408">Anwar repeatedly drew a boundary around Singapore's role, saying Malaysia should not ask another country to interfere in its elections, even though companies in Singapore could be informed to ease voting arrangements for Malaysian workers. He also said Sunday voting would better suit Malaysians working half-days in Singapore, but stressed the Election Commission is independent. On the JS-SEZ, Anwar rejected claims that Johor alone controls the project, and Tengku Zafrul framed Singapore cooperation as a federal delivery story. Lim Kit Siang used Singapore to discuss overseas Malaysians and return migration.</p>
+      <div class="time" data-ed="b409">Tue 7 Jul 2026 · 18:00 Singapore time · 496 words</div>
+    </div>
+  </div>
+  <p class="note" style="text-align:center;max-width:560px;margin:0 auto 18px" data-ed="b410">Model output from the logs, verbatim apart from typography; the header line was added. The numbers it quotes came from the engine; the model was not allowed to compute any of them. One error rode along into the campaign's last day: the briefing's instructions carried a wrong count, 29 seats without a PN candidate, where the engine's own line-up data (and section 07) say 23. The 29 is a coincidence with the 29-seat majority line. We come back to this in the post-mortem.</p>
+
+  <!-- PLACEHOLDER: Daily Toast screenshots -->
+  <div class="ph small" style="margin-top:18px" data-ed="b411">
+    <span class="lbl">Placeholder · Toast screenshots</span>
+    <p data-ed="b412">Optional: one or two screenshots of the actual Telegram messages, if you would rather show the real thing than the typeset version above.</p>
+  </div>
 </section>
 
 <!-- ============================================================ 10 -->

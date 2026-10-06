@@ -70,6 +70,7 @@ Sections (ids `s1`–`s11`, kickers in `h2 .num`):
 05 What we fed it (rubric table, "what we used" table, hood panel with the 22-row `#ind-table` filterable by grade; the tier grouping and the +/− grade suffixes were removed at the author's request on 6 Oct 2026, so grades are plain A–D; keep-or-drop placeholder) ·
 06 Monitoring (methodology table, six figures, rejected-data table, two "not explored" cards) ·
 07 Predicting (engine, hood panel with equations/backtests, six analyst cards, `.kinds` legend, `#pipe` diagram + `#pipe-out`, two figures, hood panel with the weight matrix) ·
+(On 6 Oct 2026 the author swapped the order of the next two: the machine now comes first as 08 and the Daily Toast is 09; the section ids `s8` = Toast and `s9` = machine were kept, only the kickers, the contents list and the cross-references changed.)
 08 The Daily Toast (`.phone .bubble` verbatim briefing + note) ·
 09 The machine (`.stats`, tabbed dashboard screenshots, two paragraphs + figure on the manual override sidebar, `#tl-box` forecast timeline with scrubber, readout tiles and table view) ·
 10 Results (placeholder) · 11 Next steps (the `.next` "three threads" box was removed at the author's request on 6 Oct 2026).
