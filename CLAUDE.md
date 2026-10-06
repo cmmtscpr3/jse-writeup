@@ -24,6 +24,7 @@ against the sources, what reviewers found, and what is still open.
 | `tools/capture_dashboard.js` | Re-captures the screenshots (`shots`) or the per-cycle seat history (`history`) from the reference pages. | `node tools/capture_dashboard.js shots` / `history`, then `python3 tools/embed_assets.py --hist`. |
 | `writeup.editable.html` | **Generated**: `writeup.html` plus an in-page text editor (see section 10). Never edit by hand. | `python3 tools/make_editable.py` after every change to `writeup.html`. |
 | `writeup.shared.html` | **Generated**: the article prepared for publishing as a claude.ai page with a shared multi-editor (section 11). Not standalone: no html/head/body wrapper, needs `window.claude`. Published at https://claude.ai/artifact/KcKj2GkKtg4BvTiW33Xygm | `python3 tools/make_shared.py`, then republish with the Artifact tool (same file path keeps the URL). |
+| `tools/bake_ids.py` | Bakes the editable-block ids into `writeup.html` (see section 5). Idempotent. | Run after adding text-bearing elements to the source. |
 | `tools/make_editable.py`, `tools/editor/`, `tools/test_editor.js` | The build script, the editor's source (`pre.js`, `editor.js`, `editor.css`, `toolbar.html`) inlined into the editable copy, and its end-to-end test. | Edit the editor here, rebuild, run `node tools/test_editor.js` (section 10). |
 
 Parsing tip for the two big HTML files: find the offset of `const DATA = ` / `const SNAPSHOT = ` and
@@ -66,7 +67,7 @@ Sections (ids `s1`–`s11`, kickers in `h2 .num`):
 02 What really happened (`.toaster` graphic, `.chain` six-step strip) ·
 03 Design (`.proc` design/build lanes, `.funnel`, yardstick cards, `.assump` list, `.fw` framework with click-to-reveal `#fw-out`) ·
 04 The three interfaces (`.ifaces`) ·
-05 What we fed it (rubric table, "what we used" table, hood panel with the 22-row filterable `#ind-table`, keep-or-drop placeholder) ·
+05 What we fed it (rubric table, "what we used" table, hood panel with the 22-row `#ind-table` filterable by grade; the tier grouping and the +/− grade suffixes were removed at the author's request on 6 Oct 2026, so grades are plain A–D; keep-or-drop placeholder) ·
 06 Monitoring (methodology table, six figures, rejected-data table, two "not explored" cards) ·
 07 Predicting (engine, hood panel with equations/backtests, six analyst cards, `.kinds` legend, `#pipe` diagram + `#pipe-out`, two figures, hood panel with the weight matrix) ·
 08 The Daily Toast (`.phone .bubble` verbatim briefing + note) ·
@@ -79,6 +80,7 @@ Interactive components (inline script, no dependencies): progress bar; "open all
 
 ## 5. Working on the file
 
+- **Block ids are baked into the source** since 6 Oct 2026: every editable block carries `data-ed="bN"` (from `tools/bake_ids.py`, which replays pre.js's rules over the source text). Keep them: they are what ties the shared draft's per-block edits to the text. Deleting an element removes only its own id; a new text-bearing element gets a fresh id above the highest existing one (`python3 tools/bake_ids.py` bakes it; pre.js also assigns one at runtime if you forget). Exports strip the attributes.
 - Edit `writeup.html` directly. Images are embedded, so the file is 2.3 MB; to read the source comfortably, strip data URIs into a scratch copy (`re.sub(r'data:image/[a-z]+;base64,[A-Za-z0-9+/=]+','DATAURI',s)`). Do not strip the repo copy in place (the permission classifier blocks that as destructive, and it is unnecessary: the embed script re-embeds).
 - For large rewrites, write the whole file with empty `src=""` on the `data-asset` images and run `python3 tools/embed_assets.py`. The Write tool requires a fresh Read of the file first.
 - For small edits, Python exact-string replacement works well. The prose uses straight apostrophes (') throughout and real curly double quotes (U+201C/U+201D); match those exactly.
@@ -170,9 +172,9 @@ https://claude.ai/artifact/KcKj2GkKtg4BvTiW33Xygm with capabilities
 `{db:{}, user:{scopes:["profile"]}, room:{}, comments:{composer_only:true}, downloads:true, assets:{}}`
 (the `assets` declaration makes it organization-internal: no public link). Republish by publishing the
 same file path from this session, or `url` from another. The team is actively editing there (38 block
-edits by two people as of 6 Oct 2026), so before changing `writeup.html` check that block ids stay
-stable: assign ids with pre.js on the old and new file and compare (a text or class change inside an
-existing element is safe; adding or removing a text-bearing element before other blocks shifts ids).
+edits by two people as of 6 Oct 2026), and the block ids are baked into the source (section 5), so structural edits to `writeup.html` are safe as
+long as the existing `data-ed` attributes are kept; after a change, compare the id -> element map of the old
+and new file (pre.js on both) to be sure only the intended ids appeared or disappeared.
 Comments on the page sent to Claude arrive in this session; answer in the thread with ArtifactComments.
 
 Model (same block ids as the local editor, from pre.js):

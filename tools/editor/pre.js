@@ -7,6 +7,7 @@
   var EXCL = 'nav.toc,#lb,svg,button,select,input,textarea,[data-editor],.tabs,#tl-box,#pipe,#pipe-out,#fw-out,script,style,summary,template';
   var INLINE = /^(a|b|i|em|strong|span|small|code|sup|sub|br|wbr|kbd|abbr|time|mark|s|u|q|cite|var)$/i;
   var n = 0;
+  Array.prototype.forEach.call(document.querySelectorAll('[data-ed]'), function (el) { var m = /^b(\d+)$/.exec(el.getAttribute('data-ed')); if (m && +m[1] > n) n = +m[1]; });   // ids baked into the source keep their numbers
   function hasText(el) {
     for (var c = el.firstChild; c; c = c.nextSibling) if (c.nodeType === 3 && /\S/.test(c.nodeValue)) return true;
     return false;
