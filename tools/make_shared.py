@@ -41,6 +41,11 @@ for s in styles:
 out.append("<style data-editor>\n" + read("editor.css") + "\n" + read("shared.css") + "\n</style>")
 out.append('<script type="text/plain" data-editor id="ed-head" data-html-attrs="%s">%s</script>' % (html_attrs.replace('"', "&quot;"), head))
 out.append(body.strip("\n"))
+# the local editor, carried as inert text so "Download offline copy" can build writeup.editable.html
+for name, fid in (("toolbar.html", "ed-local-toolbar"), ("pre.js", "ed-local-pre"), ("editor.js", "ed-local-js")):
+    txt = read(name)
+    assert "</script" not in txt, name
+    out.append('<script type="text/plain" data-editor id="%s">%s</script>' % (fid, txt))
 out.append(read("toolbar_shared.html"))
 out.append('<script data-editor id="ed-main">\n' + read("shared.js") + "\n</script>")
 open(OUT, "w", encoding="utf8").write("\n".join(out) + "\n")

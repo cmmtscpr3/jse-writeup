@@ -303,6 +303,45 @@
     });
   }
 
+  // ---------- offline copy: the current shared state as a standalone writeup.editable.html
+  function buildOffline(cb) {
+    var root = ED.pristine.cloneNode(true);
+    applyAll(root);
+    var body = root.querySelector('body');
+    var css = $('style[data-editor]', root);                       // editor styles stay; everything else of ours goes
+    $$('[data-editor]', root).forEach(function (x) { if (x !== css) x.remove(); });
+    $$('p[data-ed],li[data-ed]', root).forEach(function (x) { if (isAdded(x.getAttribute('data-ed')) && !x.textContent.trim() && !x.querySelector('img')) x.remove(); });
+    $$('[contenteditable],[data-ed-changed],[spellcheck],[data-ed-peer]', root).forEach(function (x) { ['contenteditable', 'spellcheck', 'data-ed-changed', 'data-ed-peer', 'style'].forEach(function (a) { if (a !== 'style' || x.hasAttribute('data-ed-peer')) x.removeAttribute(a); }); });
+    body.classList.remove('ed-on'); if (!body.className) body.removeAttribute('class');
+    var src = function (id) { var e = $('#' + id); return e ? e.textContent : ''; };
+    var mk = function (id, text) { var sc = document.createElement('script'); sc.setAttribute('data-editor', ''); sc.id = id; sc.textContent = text; return sc; };
+    var scripts = $$('body > script:not([type="application/json"])', root), main = scripts[scripts.length - 1];
+    if (main) body.insertBefore(mk('ed-pre', src('ed-local-pre')), main); else body.appendChild(mk('ed-pre', src('ed-local-pre')));
+    var tb = document.createElement('template'); tb.innerHTML = src('ed-local-toolbar');
+    body.appendChild(tb.content.firstElementChild); body.appendChild(mk('ed-main', src('ed-local-js')));
+    body.setAttribute('data-ed-build', new Date().toISOString().replace(/[-:]/g, '').slice(0, 15).replace('T', '-') + '-' + Math.floor(Math.random() * 46656).toString(36));
+    var imgs = $$('img[src^="/_blob/"]', root), left = imgs.length;
+    function finish() {
+      var headEl = $('#ed-head'), head = headEl ? headEl.textContent : '<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">';
+      var attrs = headEl && headEl.getAttribute('data-html-attrs') || ' lang="en"';
+      var inner = Array.prototype.map.call(body.childNodes, function (n) { return n.nodeType === 1 && (n.tagName === 'TITLE' || n.hasAttribute('data-fromhead')) ? '' : (n.outerHTML !== undefined ? n.outerHTML : n.nodeValue); }).join('');
+      var bodyTag = '<body data-ed-build="' + body.getAttribute('data-ed-build') + '">';
+      cb('<!DOCTYPE html>\n<html' + attrs + '>\n<head>' + head + css.outerHTML + '</head>\n' + bodyTag + inner + '</body>\n</html>\n');
+    }
+    if (!left) return finish();
+    imgs.forEach(function (im) {
+      fetch(im.getAttribute('src')).then(function (r) { return r.blob(); }).then(function (b) { var rd = new FileReader(); rd.onload = function () { im.setAttribute('src', rd.result); if (!--left) finish(); }; rd.onerror = function () { if (!--left) finish(); }; rd.readAsDataURL(b); }).catch(function () { if (!--left) finish(); });
+    });
+  }
+  function downloadOffline() {
+    if (!caps.downloads) { toast('Downloads are not available in this view.'); return; }
+    buildOffline(function (html) {
+      caps.downloads.save({ filename: 'writeup.editable.html', data: new Blob([html], { type: 'text/html' }) }).then(function () {
+        toast('Saved writeup.editable.html (' + (html.length / 1e6).toFixed(1) + ' MB) with everything on this page as of now. Open it in any browser to edit offline; edits made there do not come back here.', 10000);
+      }, function (e) { if (e.code === 'declined') return; toast(e.code === 'extension_not_enabled' ? 'HTML downloads are switched off in this view.' : 'Download failed (' + e.code + ').'); });
+    });
+  }
+
   // ---------- events
   document.addEventListener('click', function (e) {
     if (!on || !e.target.closest) return;
@@ -358,6 +397,7 @@
   $('#ed-changes').onclick = function () { var p = $('#ed-panel'); p.hidden = !p.hidden; $('#ed-helpbox').hidden = true; $('#ed-help').setAttribute('aria-expanded', 'false'); this.setAttribute('aria-expanded', String(!p.hidden)); renderChanges(); };
   $('#ed-help').onclick = function () { var p = $('#ed-helpbox'); p.hidden = !p.hidden; $('#ed-panel').hidden = true; $('#ed-changes').setAttribute('aria-expanded', 'false'); this.setAttribute('aria-expanded', String(!p.hidden)); };
   $('#ed-export').onclick = exportFinal;
+  $('#ed-offline').onclick = downloadOffline;
   $('#ed-comment').onclick = function () {
     if (!caps.comments || !lastLeaf || !lastLeaf.isConnected) { toast('Click a paragraph first, then Comment.'); return; }
     caps.comments.openComposer({ element: lastLeaf }).then(function (r) { if (!r.opened) toast('Finish or close the open comment first.'); }, function (e) { if (e.code === 'unavailable') { $('#ed-comment').hidden = true; toast('Commenting is not available in this view.'); } });
@@ -371,7 +411,7 @@
     caps = { db: r[0], user: r[1], room: r[2], comments: r[3], downloads: r[4], assets: r[5] };
     if (!caps.db) { setSync('not connected'); setReadOnly(window.claude ? 'Sign in to claude.ai to edit this draft.' : null); return; }
     var after = function () {
-      $('#ed-comment').hidden = !caps.comments; $('#ed-export').hidden = !caps.downloads;
+      $('#ed-comment').hidden = !caps.comments; $('#ed-export').hidden = !caps.downloads; $('#ed-offline').hidden = !caps.downloads;
       if (canWrite === false) setReadOnly('You can read this draft but not change it. Ask the owner for Contributor access.');
       subscribe();
       if (caps.room) { caps.room.onPeers(renderPeers, function () { }); }

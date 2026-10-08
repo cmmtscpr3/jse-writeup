@@ -111,6 +111,21 @@ const MOCK = `(() => {
   ok(/EDIT1 MORE/.test(fin) && /New paragraph here\./.test(fin) && /My real title note/.test(fin) && /Remote text from Alex\./.test(fin), 'final carries everyone’s edits');
   ok(!/PLACEHOLDER: title|PLACEHOLDER: byline|PLACEHOLDER: Daily Toast/.test(fin) && /PLACEHOLDER: main questions/.test(fin), 'resolved placeholder comments dropped, others kept');
   ok((fin.match(/<img class="shot"/g) || []).length === 13, 'final has 13 images');
+  // 8b. offline copy: a standalone writeup.editable.html carrying the shared state, with the local editor
+  await page.click('#ed-offline'); await page.waitForTimeout(600);
+  const off = await page.evaluate(() => window.__mock.saved);
+  const offPath = path.join(S, 'shared_offline.html'); fs.writeFileSync(offPath, off.text);
+  ok(off.filename === 'writeup.editable.html' && off.text.startsWith('<!DOCTYPE html>') && /id="ed-pre"/.test(off.text) && /id="ed-main"/.test(off.text) && !/ed-local-|id="ed-head"/.test(off.text), 'offline copy is a standalone editable document');
+  const ctx2 = await browser.newContext({ viewport: { width: 1280, height: 900 }, acceptDownloads: true });   // no mock runtime: plain file
+  const po = await ctx2.newPage(); const errsO = []; po.on('pageerror', e => errsO.push(e.message)); po.on('request', r => { if (!/^(file|data|blob):/.test(r.url())) errsO.push('EXTERNAL ' + r.url()); });
+  await po.goto('file://' + offPath, { waitUntil: 'load' }); await po.addStyleTag({ content: 'html{scroll-behavior:auto !important}' });
+  ok(await po.isVisible('#ed-open') && await po.evaluate(() => /EDIT1 MORE/.test(document.querySelector('p.standfirst').textContent) && document.querySelector('p.standfirst').nextElementSibling.textContent === 'New paragraph here.' && /Remote text from Alex\./.test(document.body.textContent)), 'offline copy opens with the local editor and carries everyone’s edits');
+  await po.click('#ed-open'); await po.click('p.standfirst'); await po.keyboard.press('Control+End'); await po.keyboard.type(' OFFLINE'); await po.waitForTimeout(300);
+  const [dlo] = await Promise.all([po.waitForEvent('download'), po.click('#ed-export')]);
+  const finO = fs.readFileSync(await dlo.path(), 'utf8');
+  ok(dlo.suggestedFilename() === 'writeup.html' && /EDIT1 MORE OFFLINE/.test(finO) && !/data-editor|contenteditable|data-ed[-="]/.test(finO) && (finO.match(/<img class="shot"/g) || []).length === 13, 'offline copy edits and exports a clean final with no connection');
+  ok(errsO.length === 0, 'offline copy: no page errors or external requests ' + JSON.stringify(errsO.slice(0, 3)));
+  await ctx2.close();
   // 9. revert the remote edit -> doc deleted, text restored
   await page.click('#ed-changes'); await page.click('#ed-changes'); await page.waitForTimeout(300);
   const ridx = await page.evaluate(() => Array.from(document.querySelectorAll('#ed-panel .ed-chg')).findIndex(c => /Remote text from Alex/.test(c.textContent)));

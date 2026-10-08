@@ -7,6 +7,7 @@
       <button type="button" id="ed-comment" title="Open a comment on the paragraph you last clicked" hidden>Comment</button>
       <button type="button" id="ed-help" aria-expanded="false" aria-controls="ed-helpbox">How to edit</button>
       <button type="button" id="ed-export" class="ed-primary" title="Download the clean writeup.html, without the editor" hidden>Export final</button>
+      <button type="button" id="ed-offline" title="Download writeup.editable.html: the draft as it stands now, with the offline editor built in" hidden>Download offline copy</button>
       <button type="button" id="ed-done">Done</button>
     </div>
   </div>
@@ -20,6 +21,7 @@
       <li>Amber boxes are placeholders. <b>Replace with text</b> swaps the box for a paragraph, <b>Add image</b> inserts a figure above it, <b>Delete box</b> removes it. The ✓ beside an amber underline marks that text as final.</li>
       <li><b>Comment</b> opens a comment thread on the paragraph you last clicked; comments live in this page's comment panel, not in the article.</li>
       <li><b>Changes</b> lists every change with who made it and a revert button. <b>Export final</b> downloads the clean <code>writeup.html</code>; Claude can also pull the current state straight from this page.</li>
+      <li><b>Download offline copy</b> gives you <code>writeup.editable.html</code>: the draft as it stands now, with an editor that works with no connection. Edits made there stay in that file; they do not flow back to this page, so treat the download as a hand-off once collaboration here is finished.</li>
     </ul>
   </div>
   <div class="ed-toast" id="ed-toast" role="status" hidden></div>

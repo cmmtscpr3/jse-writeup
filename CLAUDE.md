@@ -195,6 +195,11 @@ Model (same block ids as the local editor, from pre.js):
   puts a name tag (`data-ed-peer`, colour `--peer`) on the block another person is in. `user.can
   ("data.write") === false` or a rejected write -> "View only" (shared edits still shown). Comment button
   -> `comments.openComposer({element: lastLeaf})`. Export -> `downloads.save` (html is on the allowlist).
+- **Download offline copy** (added 8 Oct 2026): builds `writeup.editable.html` in the browser from the current
+  shared state (pristine + ops + edits, baked ids kept, `/_blob/` images inlined) plus the local editor, which
+  `make_shared.py` embeds as inert `<script type="text/plain" id="ed-local-toolbar|pre|js">` blocks. It is a
+  hand-off: edits made in that file never return to the page by themselves; merging them back is a manual
+  step by block id (the working copy's `#ed-orig` lists the changed ids).
 - Claude can read or reset the draft with the ArtifactData tool (`list` on `ops` / `blocks`; deleting
   an op makes open pages show a "reset outside this page, reload" notice). To commit the team's edits:
   export from the page, or replay the two collections onto `writeup.html` with the same logic.
